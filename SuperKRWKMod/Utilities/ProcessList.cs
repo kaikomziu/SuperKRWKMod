@@ -41,25 +41,86 @@ namespace SuperKRWKMod.Utilities
 		[DllImport("kernel32.dll", SetLastError = true)]
 		private static extern bool CloseHandle(IntPtr hObject);
 
-		/// <summary>Lower-case executable names (e.g. "a dance of fire and ice.exe").</summary>
+		[DllImport("kernel32.dll")]
+		private static extern uint GetCurrentProcessId();
+
+		private delegate bool EnumWindowsProc(IntPtr hWnd, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		private static extern bool EnumWindows(EnumWindowsProc lpEnumFunc, IntPtr lParam);
+
+		[DllImport("user32.dll")]
+		private static extern bool IsWindowVisible(IntPtr hWnd);
+
+		[DllImport("user32.dll", CharSet = CharSet.Unicode)]
+		private static extern int GetWindowTextLengthW(IntPtr hWnd);
+
+		[DllImport("user32.dll")]
+		private static extern uint GetWindowThreadProcessId(IntPtr hWnd, out uint processId);
+
+		// Windows shell/host processes that own windows but aren't apps a person would pick.
+		private static readonly HashSet<string> SystemHosts = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+		{
+			"ApplicationFrameHost.exe", "explorer.exe", "TextInputHost.exe", "ShellExperienceHost.exe",
+			"StartMenuExperienceHost.exe", "SearchHost.exe", "SearchApp.exe", "LockApp.exe", "dwm.exe",
+			"ctfmon.exe", "SystemSettingsBroker.exe", "WidgetBoard.exe", "Widgets.exe",
+		};
+
+		/// <summary>Executable names of all running processes (e.g. "A Dance of Fire and Ice.exe").</summary>
 		public static HashSet<string> RunningExecutables()
 		{
 			var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			ForEachProcess((pid, exe) => names.Add(exe));
+			return names;
+		}
+
+		/// <summary>
+		/// Apps that have a visible, titled window (what a person thinks of as "open apps"), sorted by
+		/// name, excluding this game. Background services are left out.
+		/// </summary>
+		public static List<string> WindowedApps()
+		{
+			var pids = new HashSet<uint>();
+			EnumWindows((hWnd, lParam) =>
+			{
+				if (IsWindowVisible(hWnd) && GetWindowTextLengthW(hWnd) > 0)
+				{
+					GetWindowThreadProcessId(hWnd, out uint pid);
+					pids.Add(pid);
+				}
+				return true;
+			}, IntPtr.Zero);
+			pids.Remove(GetCurrentProcessId());
+
+			var names = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+			ForEachProcess((pid, exe) =>
+			{
+				if (pids.Contains(pid) && !SystemHosts.Contains(exe))
+					names.Add(exe);
+			});
+
+			var sorted = new List<string>(names);
+			sorted.Sort(StringComparer.OrdinalIgnoreCase);
+			return sorted;
+		}
+
+		private static void ForEachProcess(Action<uint, string> visit)
+		{
 			var snapshot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
 			if (snapshot == IntPtr.Zero || snapshot == InvalidHandle)
-				return names;
+				return;
 
 			try
 			{
 				// sizeof(PROCESSENTRY32W): 568 bytes on 64-bit, 556 on 32-bit (Marshal.SizeOf may be stripped).
 				var entry = new ProcessEntry32 { dwSize = IntPtr.Size == 8 ? 568u : 556u };
 				if (!Process32FirstW(snapshot, ref entry))
-					return names;
+					return;
 
 				do
 				{
 					if (!string.IsNullOrEmpty(entry.szExeFile))
-						names.Add(entry.szExeFile);
+						visit(entry.th32ProcessID, entry.szExeFile);
 				}
 				while (Process32NextW(snapshot, ref entry));
 			}
@@ -67,8 +128,6 @@ namespace SuperKRWKMod.Utilities
 			{
 				CloseHandle(snapshot);
 			}
-
-			return names;
 		}
 	}
 }

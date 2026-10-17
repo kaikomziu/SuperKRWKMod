@@ -12,7 +12,7 @@ namespace SuperKRWKMod.ModList
 	/// The page is assembled from copies of harmless game widgets (header, text, divider, checkbox row)
 	/// with all of the game's behaviour on them removed, so it matches the current UI theme.
 	/// </summary>
-	public class ModsSettingsPage : MonoBehaviour
+	public class ModsSettingsPage : MonoBehaviour, IModPageBuilder
 	{
 		private const string ButtonName = "ModsSettings";
 		private const string PageName = "Mods";
@@ -36,6 +36,7 @@ namespace SuperKRWKMod.ModList
 		private Transform _textTemplate;
 		private Transform _dividerTemplate;
 		private Transform _toggleTemplate;
+		private Transform _buttonTemplate;
 
 		public bool Init(MenuTabs menuTabs)
 		{
@@ -50,8 +51,9 @@ namespace SuperKRWKMod.ModList
 			_textTemplate = otherPage?.Find("LifetimeTaps");
 			_dividerTemplate = otherPage?.Find("Divider");
 			_toggleTemplate = generalPage?.Find("Autostart");
+			_buttonTemplate = otherPage?.Find("PlayTutBtn");
 
-			if (otherButton == null || otherPage == null || _headerTemplate == null || _textTemplate == null || _dividerTemplate == null || _toggleTemplate == null)
+			if (otherButton == null || otherPage == null || _headerTemplate == null || _textTemplate == null || _dividerTemplate == null || _toggleTemplate == null || _buttonTemplate == null)
 			{
 				Log.ErrorT(this, "Settings UI layout not recognised; Mods page disabled.");
 				return false;
@@ -197,6 +199,18 @@ namespace SuperKRWKMod.ModList
 
 				AddOptionalText(mod.Hotkeys, 0.75f);
 
+				if (mod.BuildExtra != null)
+				{
+					try
+					{
+						mod.BuildExtra(this);
+					}
+					catch (System.Exception e)
+					{
+						Log.ExceptionT(this, e, $"{mod.Name} failed to build its controls");
+					}
+				}
+
 				var details = mod.Details?.Invoke();
 				if (!string.IsNullOrEmpty(details))
 				{
@@ -206,6 +220,41 @@ namespace SuperKRWKMod.ModList
 			}
 
 			RefreshToggles();
+		}
+
+		// --- IModPageBuilder --------------------------------------------------------------------
+
+		void IModPageBuilder.Text(string text, float scale, bool leftAligned)
+		{
+			AddText(text, scale, leftAligned ? TextAlignmentOptions.Left : (TextAlignmentOptions?)null);
+		}
+
+		void IModPageBuilder.Toggle(ModToggle toggle)
+		{
+			AddToggle(toggle);
+			RefreshToggles();
+		}
+
+		void IModPageBuilder.Button(string label, System.Action onClick)
+		{
+			var row = Clone(_buttonTemplate);
+			var button = row.GetComponent<Button>();
+			// Replace the template's own click handler (it starts the tutorial).
+			button.onClick = new Button.ButtonClickedEvent();
+			button.onClick.AddListener(() => onClick());
+			button.interactable = true;
+			DestroyChild(row, "HoverTooltip");
+			SetStaticText(row.GetComponentInChildren<TMP_Text>(true), label);
+		}
+
+		void IModPageBuilder.Divider()
+		{
+			Clone(_dividerTemplate);
+		}
+
+		void IModPageBuilder.Refresh()
+		{
+			Rebuild();
 		}
 
 		private void AddOptionalText(System.Func<string> text, float scale)

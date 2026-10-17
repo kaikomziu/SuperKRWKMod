@@ -115,7 +115,8 @@ namespace SuperKRWKMod
 				Hotkeys = () => ModText.Get(
 					$"{_config.MeterToggleKey}: show/hide meter   {_config.ReloadKey}: reload superkrwk.ini",
 					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
-				Details = () => _appRules.Describe() + "\n\n" + _records.Describe(),
+				BuildExtra = page => _appRules.Build(page),
+				Details = () => _records.Describe(),
 			};
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Zoomies (hop & rainbow)", "ズーミー（ジャンプ＆虹色）"), "Zoomies"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Typing speed meter", "打鍵速度メーター"), "Meter"));

@@ -13,6 +13,18 @@ namespace SuperKRWKMod.ModList
 		public Action<bool> Set;
 	}
 
+	/// <summary>Lets a mod add its own controls to its section of the Mods page.</summary>
+	public interface IModPageBuilder
+	{
+		void Text(string text, float scale = 0.8f, bool leftAligned = false);
+		void Toggle(ModToggle toggle);
+		void Button(string label, Action onClick);
+		void Divider();
+
+		/// <summary>Rebuilds the page (call after changing what should be shown).</summary>
+		void Refresh();
+	}
+
 	public class ModInfo
 	{
 		public string Name;
@@ -22,6 +34,8 @@ namespace SuperKRWKMod.ModList
 		public Func<string> Hotkeys;
 		/// <summary>Optional extra block (e.g. stats), refreshed whenever the page opens.</summary>
 		public Func<string> Details;
+		/// <summary>Optional custom controls, built after the toggles and before Details.</summary>
+		public Action<IModPageBuilder> BuildExtra;
 		public readonly List<ModToggle> Toggles = new List<ModToggle>();
 	}
 

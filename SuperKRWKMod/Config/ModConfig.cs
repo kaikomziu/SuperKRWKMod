@@ -189,6 +189,40 @@ ReloadKey=F9
 		/// <summary>
 		/// Updates one value in place in the file, keeping comments and layout.
 		/// </summary>
+		/// <summary>Deletes one key from the file, keeping everything else as is.</summary>
+		public void Remove(string section, string key)
+		{
+			_values.Remove(section + "." + key);
+
+			try
+			{
+				var lines = new List<string>(File.ReadAllText(FilePath).Replace("\r\n", "\n").Split('\n'));
+				string current = null;
+				for (int i = 0; i < lines.Count; i++)
+				{
+					var line = lines[i].Trim();
+					if (line.StartsWith("[") && line.EndsWith("]"))
+					{
+						current = line.Substring(1, line.Length - 2).Trim();
+						continue;
+					}
+
+					int eq = line.IndexOf('=');
+					if (string.Equals(current, section, StringComparison.OrdinalIgnoreCase) && eq > 0
+						&& string.Equals(line.Substring(0, eq).Trim(), key, StringComparison.OrdinalIgnoreCase))
+					{
+						lines.RemoveAt(i);
+						File.WriteAllText(FilePath, string.Join("\r\n", lines.ToArray()));
+						return;
+					}
+				}
+			}
+			catch (Exception e)
+			{
+				Log.ExceptionT(this, e, $"Failed to remove {section}.{key}");
+			}
+		}
+
 		public void Set(string section, string key, string value)
 		{
 			_values[section + "." + key] = value;

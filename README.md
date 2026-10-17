@@ -29,7 +29,7 @@ All features are visual only. The mod listens to taps but never changes the game
 - **Combo counter:** "x128 COMBO" pops up next to the cat while you keep typing without a pause, changing colour at 50 / 100 / 200.
 - **Records:** today's taps, typing time, best KPS and longest combo, all-time bests and the last 7 days, shown on the Mods page and saved in `SuperKRWKMod
 ecords.csv`. Counted by the mod only; the game's stats are untouched.
-- **App rules:** switch features off while a given app is running, and back on when it closes. For example `A Dance of Fire and Ice.exe=rainbow` under `[AppRules]` in `superkrwk.ini` turns off the rainbow glow while playing ADOFAI. Features: `zoomies`, `rainbow`, `meter`, `combo`, `sleep`, `eyes`, `all`. Only app names are checked, locally.
+- **App rules:** switch features off while a given app is running, and back on when it closes. Edit them in game under Settings → Mods → App rules: "+ Add from running apps" lists apps with an open window, then tick the features to switch off. They are stored in `superkrwk.ini`; for example `A Dance of Fire and Ice.exe=rainbow` under `[AppRules]` in `superkrwk.ini` turns off the rainbow glow while playing ADOFAI. Features: `zoomies`, `rainbow`, `meter`, `combo`, `sleep`, `eyes`, `all`. Only app names are checked, locally.
 - **Mod list:** open the game menu → Settings → **Mods** to see installed mods and switch each feature on or off.
 - **Settings:** `SuperKRWKMod\superkrwk.ini` in the game folder is created on first launch. Edit it and press `F9` (with Bongo Cat focused) to reload.
 

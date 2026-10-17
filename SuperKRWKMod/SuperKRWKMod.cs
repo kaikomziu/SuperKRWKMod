@@ -16,7 +16,7 @@ namespace SuperKRWKMod
 	public class SuperKRWKMod : MonoBehaviour
 	{
 		// Assembly attributes can't be read at runtime: the game's stripped mscorlib lacks their types.
-		public const string Version = "0.10.0";
+		public const string Version = "0.11.0";
 
 		private const string UiPath = "DraggableFrame/UI";
 		private const string VisualsPath = "DraggableFrame/CatVisuals";

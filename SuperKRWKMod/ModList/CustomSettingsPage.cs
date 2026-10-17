@@ -8,14 +8,17 @@ using UnityEngine.UI;
 namespace SuperKRWKMod.ModList
 {
 	/// <summary>
-	/// Adds a "Mods" category to the game's Settings view, listing every registered mod.
-	/// The page is assembled from copies of harmless game widgets (header, text, divider, checkbox row)
-	/// with all of the game's behaviour on them removed, so it matches the current UI theme.
+	/// Adds a category of our own to the game's Settings view (e.g. "Mods", "Records").
+	/// The page is assembled from copies of harmless game widgets (header, text, divider, checkbox row,
+	/// button) with all of the game's behaviour on them removed, so it matches the current UI theme.
 	/// </summary>
-	public class ModsSettingsPage : MonoBehaviour, IModPageBuilder
+	public class CustomSettingsPage : MonoBehaviour, IModPageBuilder
 	{
-		private const string ButtonName = "ModsSettings";
-		private const string PageName = "Mods";
+		private static readonly List<CustomSettingsPage> All = new List<CustomSettingsPage>();
+
+		private string _id;
+		private System.Func<string> _title;
+		private System.Action<IModPageBuilder> _build;
 
 		private struct ToggleRow
 		{
@@ -38,8 +41,15 @@ namespace SuperKRWKMod.ModList
 		private Transform _toggleTemplate;
 		private Transform _buttonTemplate;
 
-		public bool Init(MenuTabs menuTabs)
+		/// <param name="id">Unique name for the button/page objects.</param>
+		/// <param name="title">Category name shown on the button and in the page header.</param>
+		/// <param name="build">Fills the page; called every time it is opened or refreshed.</param>
+		public bool Init(MenuTabs menuTabs, string id, System.Func<string> title, System.Action<IModPageBuilder> build)
 		{
+			_id = id;
+			_title = title;
+			_build = build;
+
 			var settingsView = menuTabs.transform.Find("Content/SettingsView");
 			var tabButtons = settingsView?.Find("TabButtons");
 			var otherButton = tabButtons?.Find("OtherSettings");
@@ -55,7 +65,7 @@ namespace SuperKRWKMod.ModList
 
 			if (otherButton == null || otherPage == null || _headerTemplate == null || _textTemplate == null || _dividerTemplate == null || _toggleTemplate == null || _buttonTemplate == null)
 			{
-				Log.ErrorT(this, "Settings UI layout not recognised; Mods page disabled.");
+				Log.ErrorT(this, $"Settings UI layout not recognised; {id} page disabled.");
 				return false;
 			}
 
@@ -64,11 +74,12 @@ namespace SuperKRWKMod.ModList
 			CreateButton(otherButton, tabButtons);
 			CreatePage(otherPage);
 			HookGameTabs(tabButtons);
+			All.Add(this);
 			Rebuild();
 			ModRegistry.Changed += Rebuild;
 			ModText.LanguageChanged += OnLanguageChanged;
 
-			Log.InfoT(this, "Mods settings page added.");
+			Log.InfoT(this, $"{id} settings page added.");
 			return true;
 		}
 
@@ -76,13 +87,15 @@ namespace SuperKRWKMod.ModList
 		{
 			ModRegistry.Changed -= Rebuild;
 			ModText.LanguageChanged -= OnLanguageChanged;
+			All.Remove(this);
 		}
 
 		private void CreateButton(Transform template, Transform parent)
 		{
 			var go = Instantiate(template.gameObject, parent, false);
-			go.name = ButtonName;
-			go.transform.SetSiblingIndex(template.GetSiblingIndex() + 1);
+			go.name = _id + "Settings";
+			// After "Other" and any of our own categories added before this one.
+			go.transform.SetSiblingIndex(template.GetSiblingIndex() + 1 + All.Count);
 
 			_button = go.GetComponent<Button>();
 			_button.onClick = new Button.ButtonClickedEvent();
@@ -91,12 +104,12 @@ namespace SuperKRWKMod.ModList
 
 			var label = go.GetComponentInChildren<TMP_Text>(true);
 			_buttonLabel = label;
-			SetStaticText(label, ModText.Get("Mods", "MOD"));
+			SetStaticText(label, _title());
 		}
 
 		private void CreatePage(Transform template)
 		{
-			_page = new GameObject(PageName);
+			_page = new GameObject(_id);
 			_page.layer = template.gameObject.layer;
 			var rect = _page.AddComponent<RectTransform>();
 			rect.SetParent(_content, false);
@@ -126,13 +139,21 @@ namespace SuperKRWKMod.ModList
 			{
 				var child = tabButtons.GetChild(i);
 				var button = child.GetComponent<Button>();
-				if (button == null || button == _button)
+				if (button == null || button == _button || IsCustomButton(button))
 					continue;
 
 				_gameButtons.Add(button);
 				var pageName = child.name.Replace("Settings", "");
 				button.onClick.AddListener(() => OnGameTabClicked(button, pageName));
 			}
+		}
+
+		private static bool IsCustomButton(Button button)
+		{
+			foreach (var page in All)
+				if (page._button == button)
+					return true;
+			return false;
 		}
 
 		private void OnGameTabClicked(Button button, string pageName)
@@ -157,9 +178,10 @@ namespace SuperKRWKMod.ModList
 			_page.SetActive(true);
 			foreach (var button in _gameButtons)
 				button.interactable = true;
-			_button.interactable = false;
+			foreach (var page in All)
+				page._button.interactable = page != this;
 
-			// Rebuild so live details (records) are current.
+			// Rebuild so live content (records, app status) is current.
 			Rebuild();
 			if (_scroll != null)
 				_scroll.verticalNormalizedPosition = 1f;
@@ -167,7 +189,7 @@ namespace SuperKRWKMod.ModList
 
 		private void OnLanguageChanged()
 		{
-			SetStaticText(_buttonLabel, ModText.Get("Mods", "MOD"));
+			SetStaticText(_buttonLabel, _title());
 			Rebuild();
 		}
 
@@ -182,41 +204,15 @@ namespace SuperKRWKMod.ModList
 
 			var header = Clone(_headerTemplate);
 			// Keep "Settings" localized; replace the category name.
-			SetStaticText(header.Find("CategoryTxt")?.GetComponent<TMP_Text>(), ModText.Get("Mods", "MOD"));
+			SetStaticText(header.Find("CategoryTxt")?.GetComponent<TMP_Text>(), _title());
 
-			int count = ModRegistry.Mods.Count;
-			AddText(ModText.Get($"{count} mod(s) installed", $"{count}個のMODが導入されています"), 0.8f);
-
-			foreach (var mod in ModRegistry.Mods)
+			try
 			{
-				Clone(_dividerTemplate);
-				AddText($"<b>{mod.Name}</b> <size=80%>v{mod.Version}</size>", 1.1f);
-				AddOptionalText(mod.Author, 0.75f);
-				AddOptionalText(mod.Description, 0.8f);
-
-				foreach (var toggle in mod.Toggles)
-					AddToggle(toggle);
-
-				AddOptionalText(mod.Hotkeys, 0.75f);
-
-				if (mod.BuildExtra != null)
-				{
-					try
-					{
-						mod.BuildExtra(this);
-					}
-					catch (System.Exception e)
-					{
-						Log.ExceptionT(this, e, $"{mod.Name} failed to build its controls");
-					}
-				}
-
-				var details = mod.Details?.Invoke();
-				if (!string.IsNullOrEmpty(details))
-				{
-					Clone(_dividerTemplate);
-					AddText(details, 0.75f, TextAlignmentOptions.Left);
-				}
+				_build(this);
+			}
+			catch (System.Exception e)
+			{
+				Log.ExceptionT(this, e, $"Failed to build the {_id} page");
 			}
 
 			RefreshToggles();
@@ -255,13 +251,6 @@ namespace SuperKRWKMod.ModList
 		void IModPageBuilder.Refresh()
 		{
 			Rebuild();
-		}
-
-		private void AddOptionalText(System.Func<string> text, float scale)
-		{
-			var value = text?.Invoke();
-			if (!string.IsNullOrEmpty(value))
-				AddText(value, scale);
 		}
 
 		private void AddText(string text, float scale)

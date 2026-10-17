@@ -17,6 +17,8 @@ namespace SuperKRWKMod.Features
 	/// </summary>
 	public class ChestNotice : MonoBehaviour
 	{
+		// Left of the combo counter (see ComboDisplay).
+		private static readonly Vector2 CountdownPosition = new Vector2(-155f, 82f);
 		// Used only when the game's chat bubble can't be found.
 		private static readonly Vector2 FallbackPosition = new Vector2(0f, 142f);
 		private const float CheckSeconds = 0.5f;
@@ -36,6 +38,8 @@ namespace SuperKRWKMod.Features
 		private TMP_Text _bubbleText;
 		private CanvasGroup _bubbleGroup;
 		private Vector2 _bubbleBase;
+		private TextMeshProUGUI _countdown;
+		private string _countdownText;
 		private readonly RenderDemand _render = new RenderDemand();
 		private Watched _normal;
 		private Watched _emote;
@@ -76,6 +80,18 @@ namespace SuperKRWKMod.Features
 				graphic.raycastTarget = false;
 			_bubbleBase = _bubble.anchoredPosition;
 			_bubble.gameObject.SetActive(false);
+
+			_countdown = UiUtil.CreateLabel("SuperKRWKChestCountdown", fallbackParent, style, 9f, CountdownPosition, new Vector2(120f, 30f));
+			_countdown.alignment = TextAlignmentOptions.Right;
+			_countdown.gameObject.SetActive(false);
+			ApplyConfig();
+		}
+
+		public void ApplyConfig()
+		{
+			if (_countdown != null)
+				_countdown.rectTransform.anchoredPosition = CountdownPosition + new Vector2(_config.CountdownOffsetX, _config.CountdownOffsetY);
+			_countdownText = null;
 		}
 
 		private void Update()
@@ -93,6 +109,35 @@ namespace SuperKRWKMod.Features
 
 			Check(_normal);
 			Check(_emote);
+			UpdateCountdown();
+		}
+
+		private void UpdateCountdown()
+		{
+			bool show = _config.ChestEnabled && _config.ChestCountdown && (Shop.NormalShop != null || Shop.EmoteShop != null);
+			if (!show)
+			{
+				if (_countdown.gameObject.activeSelf)
+				{
+					_countdown.gameObject.SetActive(false);
+					OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(0.05f);
+				}
+				_countdownText = null;
+				return;
+			}
+
+			var sb = new StringBuilder();
+			AppendStatus(sb, Shop.NormalShop, ModText.Get("Chest", "宝箱"));
+			AppendStatus(sb, Shop.EmoteShop, ModText.Get("Emote", "エモート"));
+			var text = sb.ToString().TrimStart('\n');
+			if (text == _countdownText)
+				return;
+
+			_countdownText = text;
+			_countdown.text = text;
+			_countdown.gameObject.SetActive(true);
+			// The game may have paused rendering in the background; show the new time.
+			OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(0.05f);
 		}
 
 		private void Check(Watched watched)
@@ -176,40 +221,30 @@ namespace SuperKRWKMod.Features
 			_bubbleGroup.alpha = 1f - Mathf.Clamp01((t - (BubbleSeconds - FadeSeconds)) / FadeSeconds);
 		}
 
-		/// <summary>Text for the Mods settings page.</summary>
-		public string Describe()
-		{
-			var sb = new StringBuilder();
-			sb.Append("<b>").Append(ModText.Get("Chests", "宝箱")).Append("</b>");
-			AppendStatus(sb, Shop.NormalShop, ModText.Get("Chest", "宝箱"));
-			AppendStatus(sb, Shop.EmoteShop, ModText.Get("Emote chest", "エモート宝箱"));
-			return sb.ToString();
-		}
-
 		private static void AppendStatus(StringBuilder sb, Shop shop, string name)
 		{
 			if (shop == null)
 				return;
 
-			sb.Append('\n').Append(name).Append(": ");
+			sb.Append('\n').Append(name).Append(' ');
 			if (!shop.ChestIsReady)
 			{
 				int seconds = Mathf.Max(0, shop.StockRefreshTimeLeft);
-				sb.Append(ModText.Get($"next in {seconds / 60}:{seconds % 60:00}", $"次まで {seconds / 60}分{seconds % 60:00}秒"));
+				sb.Append(seconds / 60).Append(':').Append((seconds % 60).ToString("00"));
 				return;
 			}
 
 			if (shop.CanAffordChest)
 			{
-				sb.Append(ModText.Get("ready to buy!", "買えます！"));
+				sb.Append("<color=#ff8c26>").Append(ModText.Get("ready!", "買える！")).Append("</color>");
 				return;
 			}
 
 			var item = shop.GetComponentInChildren<ShopItem>(true);
 			int missing = item != null ? MissingPets(item.Price) : -1;
 			sb.Append(missing > 0
-				? ModText.Get($"{missing:#,0} more taps", $"あと {missing:#,0} タップ")
-				: ModText.Get("not enough taps yet", "タップ数が足りません"));
+				? ModText.Get($"{missing:#,0} to go", $"あと{missing:#,0}")
+				: ModText.Get("out", "出てるよ"));
 		}
 
 		/// <summary>
@@ -241,6 +276,8 @@ namespace SuperKRWKMod.Features
 
 		private void OnDestroy()
 		{
+			if (_countdown != null)
+				Destroy(_countdown.gameObject);
 			if (_bubble != null)
 				Destroy(_bubble.gameObject);
 		}

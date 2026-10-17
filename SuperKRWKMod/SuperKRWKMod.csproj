@@ -121,7 +121,8 @@
     <Compile Include="Utilities\UiUtil.cs" />
     <Compile Include="Utilities\MathUtil.cs" />
     <Compile Include="ModList\ModRegistry.cs" />
-    <Compile Include="ModList\ModsSettingsPage.cs" />
+    <Compile Include="ModList\CustomSettingsPage.cs" />
+    <Compile Include="ModList\ModListContent.cs" />
     <Compile Include="ModList\ModText.cs" />
     <Compile Include="Utilities\SpriteRasterizer.cs" />
     <Compile Include="Utilities\CatEyes.cs" />

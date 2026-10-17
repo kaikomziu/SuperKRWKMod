@@ -107,7 +107,7 @@ namespace SuperKRWKMod.Features
 			Save();
 		}
 
-		/// <summary>Text for the Mods settings page.</summary>
+		/// <summary>Text for the Records settings page.</summary>
 		public string Describe()
 		{
 			var today = Today;
@@ -125,7 +125,6 @@ namespace SuperKRWKMod.Features
 			}
 
 			var sb = new StringBuilder();
-			sb.Append("<b>").Append(ModText.Get("Records", "記録")).Append("</b>\n");
 
 			sb.Append(ModText.Get("Today: ", "今日: "))
 				.Append(Number(today.Taps)).Append(ModText.Get(" taps", " タップ"))

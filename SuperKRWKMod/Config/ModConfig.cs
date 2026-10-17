@@ -80,6 +80,10 @@ Bubble=true
 Shake=true
 ; Remind again every N minutes while it stays unopened (0 = only once).
 ReminderMinutes=10
+; Time to the next chest, shown left of the combo counter.
+Countdown=true
+CountdownOffsetX=0
+CountdownOffsetY=0
 
 [AppRules]
 ; While one of these apps is running, the listed features are switched off; they come back when it closes.
@@ -160,6 +164,9 @@ ReloadKey=F9
 		public bool ChestEnabled => GetBool("Chest", "Enabled", true) && !IsSuppressed(FeatureChest);
 		public bool ChestBubble => GetBool("Chest", "Bubble", true);
 		public bool ChestShake => GetBool("Chest", "Shake", true);
+		public bool ChestCountdown => GetBool("Chest", "Countdown", true);
+		public float CountdownOffsetX => GetFloat("Chest", "CountdownOffsetX", 0f);
+		public float CountdownOffsetY => GetFloat("Chest", "CountdownOffsetY", 0f);
 		public float ChestReminderMinutes => Mathf.Max(0f, GetFloat("Chest", "ReminderMinutes", 10f));
 
 		/// <summary>Whether the local clock is inside the night window (which may wrap past midnight).</summary>

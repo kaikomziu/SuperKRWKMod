@@ -93,8 +93,7 @@ namespace SuperKRWKMod
 			_combo = gameObject.AddComponent<ComboDisplay>();
 			_combo.Init(_config, _tracker, ui, counterStyle);
 			_chest = gameObject.AddComponent<ChestNotice>();
-			_chest.Init(_config, ui, counterStyle);
-
+			_chest.Init(_config, mainCat, ui, counterStyle);
 			_appRules.Changed += OnAppRulesChanged;
 
 			Log.InfoT(this, $"Features ready (tint targets: {tintTargets.Count}, counter style: {counterStyle != null}).");
@@ -120,7 +119,9 @@ namespace SuperKRWKMod
 					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
 				BuildExtra = page =>
 				{
-					page.Button(ModText.Get("Preview chest notice", "宝箱の通知をテスト"), () => _chest.Preview());
+					// Only while a chest is out: the notice never appears otherwise.
+					if (ChestNotice.AnyChestOut)
+						page.Button(ModText.Get("Preview chest notice", "宝箱の通知をテスト"), () => _chest.Preview());
 					_appRules.Build(page);
 				},
 				Details = () => _chest.Describe() + "\n\n" + _records.Describe(),

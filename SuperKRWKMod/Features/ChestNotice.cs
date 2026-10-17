@@ -6,6 +6,7 @@ using SuperKRWKMod.Utilities;
 using System.Text;
 using TMPro;
 using UnityEngine;
+using UnityEngine.Localization.Components;
 
 namespace SuperKRWKMod.Features
 {
@@ -16,7 +17,8 @@ namespace SuperKRWKMod.Features
 	/// </summary>
 	public class ChestNotice : MonoBehaviour
 	{
-		private static readonly Vector2 BubblePosition = new Vector2(0f, 142f);
+		// Used only when the game's chat bubble can't be found.
+		private static readonly Vector2 FallbackPosition = new Vector2(0f, 142f);
 		private const float CheckSeconds = 0.5f;
 		private const float BubbleSeconds = 5f;
 		private const float FadeSeconds = 0.6f;
@@ -30,18 +32,49 @@ namespace SuperKRWKMod.Features
 		}
 
 		private ModConfig _config;
-		private TextMeshProUGUI _bubble;
+		private RectTransform _bubble;
+		private TMP_Text _bubbleText;
+		private CanvasGroup _bubbleGroup;
+		private Vector2 _bubbleBase;
 		private readonly RenderDemand _render = new RenderDemand();
 		private Watched _normal;
 		private Watched _emote;
 		private float _nextCheck;
 		private float _bubbleTime = -100f;
 
-		public void Init(ModConfig config, Transform parent, TMP_Text style)
+		public void Init(ModConfig config, Transform mainCat, Transform fallbackParent, TMP_Text style)
 		{
 			_config = config;
-			_bubble = UiUtil.CreateLabel("SuperKRWKChestBubble", parent, style, 12f, BubblePosition, new Vector2(240f, 30f));
-			_bubble.color = new Color(1f, 0.55f, 0.15f);
+
+			// A copy of the game's chat speech bubble, so it looks like the cat is talking. Only the
+			// visuals are copied: the game's chat logic (which can send to multiplayer) isn't involved.
+			var template = mainCat.Find("Chat/SpeechBubble");
+			if (template != null)
+			{
+				var copy = Instantiate(template.gameObject, template.parent, false);
+				copy.name = "SuperKRWKChestBubble";
+				_bubble = (RectTransform)copy.transform;
+				_bubbleText = copy.GetComponentInChildren<TMP_Text>(true);
+				var localize = _bubbleText != null ? _bubbleText.GetComponent<LocalizeStringEvent>() : null;
+				if (localize != null)
+					Destroy(localize);
+			}
+			else
+			{
+				Log.WarnT(this, "Game speech bubble not found; using plain text.");
+				var label = UiUtil.CreateLabel("SuperKRWKChestBubble", fallbackParent, style, 12f, FallbackPosition, new Vector2(240f, 30f));
+				label.color = new Color(1f, 0.55f, 0.15f);
+				_bubble = label.rectTransform;
+				_bubbleText = label;
+			}
+
+			_bubbleGroup = _bubble.gameObject.GetComponent<CanvasGroup>();
+			if (_bubbleGroup == null)
+				_bubbleGroup = _bubble.gameObject.AddComponent<CanvasGroup>();
+			// Never catch the mouse (CanvasGroup.blocksRaycasts is stripped, so per graphic).
+			foreach (var graphic in _bubble.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
+				graphic.raycastTarget = false;
+			_bubbleBase = _bubble.anchoredPosition;
 			_bubble.gameObject.SetActive(false);
 		}
 
@@ -83,10 +116,17 @@ namespace SuperKRWKMod.Features
 			Notify(watched);
 		}
 
-		/// <summary>Shows the notice once so you can see what it looks like (does nothing else).</summary>
+		/// <summary>True while a chest is out in the shop (the only time a notice can appear).</summary>
+		public static bool AnyChestOut =>
+			(Shop.NormalShop != null && Shop.NormalShop.ChestIsReady) || (Shop.EmoteShop != null && Shop.EmoteShop.ChestIsReady);
+
+		/// <summary>Shows the notice once for a chest that is out, to see what it looks like.</summary>
 		public void Preview()
 		{
-			Notify(new Watched { Shop = Shop.NormalShop }, preview: true);
+			if (Shop.NormalShop != null && Shop.NormalShop.ChestIsReady)
+				Notify(new Watched { Shop = Shop.NormalShop }, preview: true);
+			else if (Shop.EmoteShop != null && Shop.EmoteShop.ChestIsReady)
+				Notify(new Watched { Shop = Shop.EmoteShop, IsEmote = true }, preview: true);
 		}
 
 		private void Notify(Watched watched, bool preview = false)
@@ -95,7 +135,7 @@ namespace SuperKRWKMod.Features
 
 			if (_config.ChestBubble)
 			{
-				_bubble.text = watched.IsEmote
+				_bubbleText.text = watched.IsEmote
 					? ModText.Get("Emote chest ready!", "エモート宝箱が買えるよ！")
 					: ModText.Get("Chest ready!", "宝箱が買えるよ！");
 				_bubbleTime = Time.unscaledTime;
@@ -131,11 +171,9 @@ namespace SuperKRWKMod.Features
 			// Pop in, bob gently, fade out at the end.
 			float pop = Mathf.Clamp01(t / 0.2f);
 			float scale = Mathf.Lerp(1.4f, 1f, pop * (2f - pop));
-			_bubble.rectTransform.localScale = new Vector3(scale, scale, 1f);
-			_bubble.rectTransform.anchoredPosition = BubblePosition + new Vector2(0f, Mathf.Sin(t * 4f) * 2f);
-			var color = _bubble.color;
-			color.a = 1f - Mathf.Clamp01((t - (BubbleSeconds - FadeSeconds)) / FadeSeconds);
-			_bubble.color = color;
+			_bubble.localScale = new Vector3(scale, scale, 1f);
+			_bubble.anchoredPosition = _bubbleBase + new Vector2(0f, Mathf.Sin(t * 4f) * 2f);
+			_bubbleGroup.alpha = 1f - Mathf.Clamp01((t - (BubbleSeconds - FadeSeconds)) / FadeSeconds);
 		}
 
 		/// <summary>Text for the Mods settings page.</summary>

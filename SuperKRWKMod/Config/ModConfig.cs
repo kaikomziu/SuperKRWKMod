@@ -71,17 +71,48 @@ TimeoutSeconds=1
 OffsetX=0
 OffsetY=0
 
+[AppRules]
+; While one of these apps is running, the listed features are switched off; they come back when it closes.
+; Format: <exe name>=<features, comma separated>
+; Features: zoomies, rainbow, meter, combo, sleep, eyes, all
+A Dance of Fire and Ice.exe=rainbow
+
 [General]
 ReloadKey=F9
 ";
 
 		private readonly Dictionary<string, string> _values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+		// Feature names for [AppRules].
+		public const string FeatureAll = "all";
+		public const string FeatureZoomies = "zoomies";
+		public const string FeatureRainbow = "rainbow";
+		public const string FeatureMeter = "meter";
+		public const string FeatureCombo = "combo";
+		public const string FeatureSleep = "sleep";
+		public const string FeatureEyes = "eyes";
+
+		private HashSet<string> _suppressed = new HashSet<string>();
+
+		/// <summary>Features temporarily switched off by app rules (not saved to the ini).</summary>
+		public HashSet<string> Suppressed => _suppressed;
+
+		public void SetSuppressed(HashSet<string> features)
+		{
+			_suppressed = features;
+		}
+
+		public bool IsSuppressed(string feature)
+		{
+			return _suppressed.Contains(feature) || _suppressed.Contains(FeatureAll);
+		}
+
 		public static string ModDirectory => Path.Combine(Path.GetDirectoryName(Application.dataPath), "SuperKRWKMod");
 
 		public static string FilePath => Path.Combine(ModDirectory, FileName);
 
-		public bool ZoomiesEnabled => GetBool("Zoomies", "Enabled", true);
+		public bool ZoomiesEnabled => GetBool("Zoomies", "Enabled", true) && !IsSuppressed(FeatureZoomies);
+		public bool RainbowEnabled => !IsSuppressed(FeatureRainbow);
 		// Older configs used keys per minute (BounceKpm/RainbowKpm); still honoured.
 		public float BounceKps => GetFloat("Zoomies", "BounceKps", GetFloat("Zoomies", "BounceKpm", 240f) / 60f);
 		public float RainbowKps => GetFloat("Zoomies", "RainbowKps", GetFloat("Zoomies", "RainbowKpm", 450f) / 60f);
@@ -89,7 +120,7 @@ ReloadKey=F9
 		public float WobbleDegrees => GetFloat("Zoomies", "WobbleDegrees", 6f);
 		public float RainbowStrength => Mathf.Clamp01(GetFloat("Zoomies", "RainbowStrength", 0.65f));
 
-		public bool MeterEnabled => GetBool("Meter", "Enabled", true);
+		public bool MeterEnabled => GetBool("Meter", "Enabled", true) && !IsSuppressed(FeatureMeter);
 		public bool MeterVisible => GetBool("Meter", "Visible", true);
 		public KeyCode MeterToggleKey => GetKey("Meter", "ToggleKey", KeyCode.F7);
 		public float MeterOffsetX => GetFloat("Meter", "OffsetX", 0f);
@@ -97,7 +128,7 @@ ReloadKey=F9
 		public float MeterFontSize => Mathf.Max(4f, GetFloat("Meter", "FontSize", 11f));
 		public float WindowSeconds => Mathf.Clamp(GetFloat("Meter", "WindowSeconds", 3f), 0.5f, 60f);
 
-		public bool SleepEnabled => GetBool("Sleep", "Enabled", true);
+		public bool SleepEnabled => GetBool("Sleep", "Enabled", true) && !IsSuppressed(FeatureSleep);
 		public float IdleSeconds => Mathf.Max(5f, GetFloat("Sleep", "IdleSeconds", 60f));
 		public bool SleepCloseEyes => GetBool("Sleep", "CloseEyes", true);
 		public int SleepAnimationFps => Mathf.Clamp((int)GetFloat("Sleep", "AnimationFps", 12f), 1, 60);
@@ -106,10 +137,10 @@ ReloadKey=F9
 		public float NightEndHour => GetFloat("Sleep", "NightEndHour", 5f);
 		public float NightIdleSeconds => Mathf.Max(5f, GetFloat("Sleep", "NightIdleSeconds", 20f));
 
-		public bool EyesFollowCursor => GetBool("Eyes", "FollowCursor", true);
+		public bool EyesFollowCursor => GetBool("Eyes", "FollowCursor", true) && !IsSuppressed(FeatureEyes);
 		public int EyesMaxShift => (int)GetFloat("Eyes", "MaxShift", 3f);
 
-		public bool ComboEnabled => GetBool("Combo", "Enabled", true);
+		public bool ComboEnabled => GetBool("Combo", "Enabled", true) && !IsSuppressed(FeatureCombo);
 		public int ComboMin => Mathf.Max(2, (int)GetFloat("Combo", "MinCombo", 10f));
 		public float ComboTimeout => Mathf.Clamp(GetFloat("Combo", "TimeoutSeconds", 1f), 0.2f, 10f);
 		public float ComboOffsetX => GetFloat("Combo", "OffsetX", 0f);
@@ -227,6 +258,19 @@ ReloadKey=F9
 
 				_values[section + "." + line.Substring(0, eq).Trim()] = line.Substring(eq + 1).Trim();
 			}
+		}
+
+		/// <summary>All key/value pairs of a section, in no particular order.</summary>
+		public List<KeyValuePair<string, string>> GetSection(string section)
+		{
+			var result = new List<KeyValuePair<string, string>>();
+			var prefix = section + ".";
+			foreach (var pair in _values)
+			{
+				if (pair.Key.StartsWith(prefix, StringComparison.OrdinalIgnoreCase))
+					result.Add(new KeyValuePair<string, string>(pair.Key.Substring(prefix.Length), pair.Value));
+			}
+			return result;
 		}
 
 		private string Get(string section, string key)

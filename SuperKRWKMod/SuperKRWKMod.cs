@@ -27,6 +27,7 @@ namespace SuperKRWKMod
 		private SpeedMeter _meter;
 		private ComboDisplay _combo;
 		private Records _records;
+		private AppRules _appRules;
 
 		private void Awake()
 		{
@@ -74,6 +75,9 @@ namespace SuperKRWKMod
 			_records = gameObject.AddComponent<Records>();
 			_records.Init(_tracker);
 
+			_appRules = gameObject.AddComponent<AppRules>();
+			_appRules.Init(_config);
+
 			var motion = gameObject.AddComponent<CatMotion>();
 			motion.Attach(visuals);
 
@@ -87,6 +91,8 @@ namespace SuperKRWKMod
 			_meter.Init(_config, _tracker, ui, counterStyle);
 			_combo = gameObject.AddComponent<ComboDisplay>();
 			_combo.Init(_config, _tracker, ui, counterStyle);
+
+			_appRules.Changed += OnAppRulesChanged;
 
 			Log.InfoT(this, $"Features ready (tint targets: {tintTargets.Count}, counter style: {counterStyle != null}).");
 
@@ -109,7 +115,7 @@ namespace SuperKRWKMod
 				Hotkeys = () => ModText.Get(
 					$"{_config.MeterToggleKey}: show/hide meter   {_config.ReloadKey}: reload superkrwk.ini",
 					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
-				Details = () => _records.Describe(),
+				Details = () => _appRules.Describe() + "\n\n" + _records.Describe(),
 			};
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Zoomies (hop & rainbow)", "ズーミー（ジャンプ＆虹色）"), "Zoomies"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Typing speed meter", "打鍵速度メーター"), "Meter"));
@@ -143,12 +149,18 @@ namespace SuperKRWKMod
 			_combo.ApplyConfig();
 		}
 
+		private void OnAppRulesChanged()
+		{
+			ApplyConfig();
+		}
+
 		private void Update()
 		{
 			if (_tracker == null || !Input.GetKeyDown(_config.ReloadKey))
 				return;
 
 			_config.Load();
+			_appRules.Reload();
 			ApplyConfig();
 			Log.InfoT(this, "Config reloaded.");
 		}

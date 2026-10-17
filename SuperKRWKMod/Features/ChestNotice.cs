@@ -107,8 +107,11 @@ namespace SuperKRWKMod.Features
 			if (_emote == null && Shop.EmoteShop != null)
 				_emote = new Watched { Shop = Shop.EmoteShop, IsEmote = true };
 
-			Check(_normal);
-			Check(_emote);
+			// Checked together so two chests appearing at once get one combined bubble.
+			bool normal = Check(_normal);
+			bool emote = Check(_emote);
+			if (normal || emote)
+				Notify(normal ? _normal : null, emote ? _emote : null);
 			UpdateCountdown();
 		}
 
@@ -140,25 +143,26 @@ namespace SuperKRWKMod.Features
 			OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(0.05f);
 		}
 
-		private void Check(Watched watched)
+		/// <summary>True when this chest should be announced now.</summary>
+		private bool Check(Watched watched)
 		{
 			if (watched == null || watched.Shop == null || Pets.Instance == null)
-				return;
+				return false;
 
 			bool buyable = watched.Shop.CanGetChest;
 			bool justBecameBuyable = buyable && !watched.WasBuyable;
 			watched.WasBuyable = buyable;
 
 			if (!buyable || !_config.ChestEnabled)
-				return;
+				return false;
 
 			float reminder = _config.ChestReminderMinutes * 60f;
 			bool remind = reminder > 0f && Time.unscaledTime - watched.LastNotice >= reminder;
 			if (!justBecameBuyable && !remind)
-				return;
+				return false;
 
 			watched.LastNotice = Time.unscaledTime;
-			Notify(watched);
+			return true;
 		}
 
 		/// <summary>True while a chest is out in the shop (the only time a notice can appear).</summary>
@@ -168,35 +172,47 @@ namespace SuperKRWKMod.Features
 		/// <summary>Shows the notice once for a chest that is out, to see what it looks like.</summary>
 		public void Preview()
 		{
-			if (Shop.NormalShop != null && Shop.NormalShop.ChestIsReady)
-				Notify(new Watched { Shop = Shop.NormalShop }, preview: true);
-			else if (Shop.EmoteShop != null && Shop.EmoteShop.ChestIsReady)
-				Notify(new Watched { Shop = Shop.EmoteShop, IsEmote = true }, preview: true);
+			var normal = Shop.NormalShop != null && Shop.NormalShop.ChestIsReady ? new Watched { Shop = Shop.NormalShop } : null;
+			var emote = Shop.EmoteShop != null && Shop.EmoteShop.ChestIsReady ? new Watched { Shop = Shop.EmoteShop, IsEmote = true } : null;
+			if (normal != null || emote != null)
+				Notify(normal, emote, preview: true);
 		}
 
-		private void Notify(Watched watched, bool preview = false)
+		private void Notify(Watched normal, Watched emote, bool preview = false)
 		{
-			Log.InfoT(this, preview ? "Chest notice preview." : $"{(watched.IsEmote ? "Emote chest" : "Chest")} can be bought.");
+			Log.InfoT(this, preview ? "Chest notice preview."
+				: $"Can be bought: {(normal != null ? "chest " : "")}{(emote != null ? "emote chest" : "")}".TrimEnd());
 
 			if (_config.ChestBubble)
 			{
-				_bubbleText.text = watched.IsEmote
-					? ModText.Get("Emote chest ready!", "エモート宝箱が買えるよ！")
-					: ModText.Get("Chest ready!", "宝箱が買えるよ！");
+				_bubbleText.text = normal != null && emote != null
+					? ModText.Get("Chest and emote chest ready!", "宝箱とエモート宝箱が買えるよ！")
+					: emote != null
+						? ModText.Get("Emote chest ready!", "エモート宝箱が買えるよ！")
+						: ModText.Get("Chest ready!", "宝箱が買えるよ！");
 				_bubbleTime = Time.unscaledTime;
 				_bubble.gameObject.SetActive(true);
 				_render.SetFullRate(true);
 			}
 
-			if (_config.ChestShake && watched.Shop != null)
+			if (_config.ChestShake)
 			{
-				// The game's own shake tween on the shop button: purely visual.
-				var shake = watched.Shop.GetComponentInChildren<ShakeAnimation>(true);
-				if (shake != null)
-				{
-					shake.Shake();
-					OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(1.5f);
-				}
+				Shake(normal);
+				Shake(emote);
+			}
+		}
+
+		private static void Shake(Watched watched)
+		{
+			if (watched == null || watched.Shop == null)
+				return;
+
+			// The game's own shake tween on the shop button: purely visual.
+			var shake = watched.Shop.GetComponentInChildren<ShakeAnimation>(true);
+			if (shake != null)
+			{
+				shake.Shake();
+				OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(1.5f);
 			}
 		}
 

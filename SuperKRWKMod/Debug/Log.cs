@@ -1,4 +1,3 @@
-using SuperKRWKMod.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -87,7 +86,8 @@ namespace SuperKRWKMod.Debug
 			}
 			else
 			{
-				tagName = RuntimeUtil.GetCallerClassName(skipFrames: 4) ?? "Unknown";
+				// No caller lookup: StackTrace is stripped from the game's mscorlib.
+				return "";
 			}
 
 			return $"{tagName} | ";

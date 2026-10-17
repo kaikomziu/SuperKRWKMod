@@ -119,6 +119,7 @@
     <Compile Include="Features\Zoomies.cs" />
     <Compile Include="Utilities\RenderDemand.cs" />
     <Compile Include="Utilities\UiUtil.cs" />
+    <Compile Include="Utilities\TextOutline.cs" />
     <Compile Include="Utilities\MathUtil.cs" />
     <Compile Include="ModList\ModRegistry.cs" />
     <Compile Include="ModList\CustomSettingsPage.cs" />
@@ -133,7 +134,6 @@
     <Compile Include="Features\ChestNotice.cs" />
     <Compile Include="Utilities\ProcessList.cs" />
     <Compile Include="Utilities\DoorstopUtil.cs" />
-    <Compile Include="Utilities\RuntimeUtil.cs" />
     <Compile Include="Debug\Log.cs" />
     <Compile Include="Debug\TimestampLogHandler.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

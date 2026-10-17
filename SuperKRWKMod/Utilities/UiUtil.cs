@@ -35,6 +35,7 @@ namespace SuperKRWKMod.Utilities
 			label.richText = true;
 			label.raycastTarget = false;
 			label.text = "";
+			TextOutline.Register(label);
 
 			return label;
 		}

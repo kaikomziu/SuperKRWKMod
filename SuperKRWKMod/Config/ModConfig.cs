@@ -85,6 +85,14 @@ Countdown=true
 CountdownOffsetX=0
 CountdownOffsetY=0
 
+[Text]
+; Outline around the mod's on-screen text (meter, combo, countdown, Zzz) for readability.
+Outline=true
+; Colour as #RRGGBB (or a name like white, black).
+OutlineColor=#FFFFFF
+; Thickness 0..1.
+OutlineWidth=0.25
+
 [AppRules]
 ; While one of these apps is running, the listed features are switched off; they come back when it closes.
 ; Format: <exe name>=<features, comma separated>
@@ -164,6 +172,21 @@ ReloadKey=F9
 		public bool ChestEnabled => GetBool("Chest", "Enabled", true) && !IsSuppressed(FeatureChest);
 		public bool ChestBubble => GetBool("Chest", "Bubble", true);
 		public bool ChestShake => GetBool("Chest", "Shake", true);
+		public bool TextOutline => GetBool("Text", "Outline", true);
+		public string TextOutlineColorName => Get("Text", "OutlineColor") ?? "#FFFFFF";
+		public float TextOutlineWidth => Mathf.Clamp01(GetFloat("Text", "OutlineWidth", 0.25f));
+
+		public Color TextOutlineColor
+		{
+			get
+			{
+				var name = TextOutlineColorName.Trim();
+				if (!name.StartsWith("#") && name.Length == 6)
+					name = "#" + name;
+				return ColorUtility.TryParseHtmlString(name, out var color) ? color : Color.white;
+			}
+		}
+
 		public bool ChestCountdown => GetBool("Chest", "Countdown", true);
 		public float CountdownOffsetX => GetFloat("Chest", "CountdownOffsetX", 0f);
 		public float CountdownOffsetY => GetFloat("Chest", "CountdownOffsetY", 0f);

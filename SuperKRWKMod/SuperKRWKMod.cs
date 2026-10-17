@@ -3,6 +3,7 @@ using SuperKRWKMod.Config;
 using SuperKRWKMod.Debug;
 using SuperKRWKMod.Features;
 using SuperKRWKMod.ModList;
+using SuperKRWKMod.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -68,6 +69,8 @@ namespace SuperKRWKMod
 					tintTargets.Add(graphic);
 			}
 
+			ApplyTextOutline();
+
 			_tracker = gameObject.AddComponent<TapTracker>();
 			_tracker.WindowSeconds = _config.WindowSeconds;
 			_tracker.ComboTimeout = _config.ComboTimeout;
@@ -124,6 +127,11 @@ namespace SuperKRWKMod
 					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
 				BuildExtra = page =>
 				{
+					page.Button(OutlineButtonLabel(), () =>
+					{
+						NextOutlinePreset();
+						page.Refresh();
+					});
 					// Only while a chest is out: the notice never appears otherwise.
 					if (ChestNotice.AnyChestOut)
 						page.Button(ModText.Get("Preview chest notice", "宝箱の通知をテスト"), () => _chest.Preview());
@@ -163,6 +171,55 @@ namespace SuperKRWKMod
 			_meter.ApplyConfig();
 			_combo.ApplyConfig();
 			_chest.ApplyConfig();
+			ApplyTextOutline();
+		}
+
+		private void ApplyTextOutline()
+		{
+			TextOutline.Configure(_config.TextOutline, _config.TextOutlineColor, _config.TextOutlineWidth);
+		}
+
+		// Outline colour choices offered on the Mods page (null colour = no outline).
+		private static readonly string[][] OutlinePresets =
+		{
+			new[] { "#FFFFFF", "White", "白" },
+			new[] { "#000000", "Black", "黒" },
+			new[] { "#FF8FB1", "Pink", "ピンク" },
+			new[] { "#7FD6FF", "Sky blue", "水色" },
+			new[] { "#FFE066", "Yellow", "黄色" },
+			new[] { null, "None", "なし" },
+		};
+
+		private int CurrentOutlinePreset()
+		{
+			if (!_config.TextOutline)
+				return OutlinePresets.Length - 1;
+			for (int i = 0; i < OutlinePresets.Length - 1; i++)
+				if (string.Equals(OutlinePresets[i][0], _config.TextOutlineColorName.Trim(), StringComparison.OrdinalIgnoreCase))
+					return i;
+			return -1; // a custom colour from the ini
+		}
+
+		private string OutlineButtonLabel()
+		{
+			int i = CurrentOutlinePreset();
+			var name = i >= 0 ? ModText.Get(OutlinePresets[i][1], OutlinePresets[i][2]) : _config.TextOutlineColorName;
+			return ModText.Get($"Text outline: {name}", $"文字の縁取り: {name}");
+		}
+
+		private void NextOutlinePreset()
+		{
+			var next = OutlinePresets[(CurrentOutlinePreset() + 1) % OutlinePresets.Length];
+			if (next[0] == null)
+			{
+				_config.Set("Text", "Outline", "false");
+			}
+			else
+			{
+				_config.Set("Text", "Outline", "true");
+				_config.Set("Text", "OutlineColor", next[0]);
+			}
+			ApplyTextOutline();
 		}
 
 		private void OnAppRulesChanged()

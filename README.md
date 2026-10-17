@@ -18,7 +18,14 @@ This mod extends the [Bongo Cat](#bongo-cat-game-) game with additional features
 
 ## Features
 
-TODO
+All features are visual only. The mod listens to taps but never changes the game's counters, Steam stats, items or drops.
+
+- **Zoomies:** type faster than `BounceKpm` and the cat hops and wobbles; past `RainbowKpm` it shimmers in rainbow colors.
+- **Speed meter:** current keys per minute, session best and session taps above the cat. Toggle with `F7`.
+- **Sleep mode:** after `IdleSeconds` without input the cat breathes slowly and floats a "Zzz". Any key wakes it.
+- **Settings:** `CatnipMod\catnip.ini` in the game folder is created on first launch. Edit it and press `F9` (with Bongo Cat focused) to reload.
+
+Hotkeys only work while the Bongo Cat window has focus (click the cat first).
 
 ## Installation
 
@@ -59,7 +66,7 @@ BongoCat/
 
 ### Verification
 
-TODO
+Open `%USERPROFILE%\AppData\LocalLow\Irox Games\BongoCat\Player.log` after launching. It should contain `[CatnipMod] CatnipMod | Features ready`.
 
 ### Uninstallation
 

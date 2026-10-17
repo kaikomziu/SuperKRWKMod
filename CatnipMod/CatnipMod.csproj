@@ -56,11 +56,6 @@
     <StartWorkingDirectory>$(BongoCatPath)</StartWorkingDirectory>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony, Version=2.4.2.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>Assets\BongoCat\CatnipMod\0Harmony.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>$(BongoCatManagedPath)\Assembly-CSharp.dll</HintPath>
       <Private>False</Private>
@@ -84,12 +79,40 @@
       <HintPath>$(BongoCatManagedPath)\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(BongoCatManagedPath)\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Entrypoint.cs" />
     <Compile Include="CatnipMod.cs" />
+    <Compile Include="Config\CatnipConfig.cs" />
+    <Compile Include="Features\CatMotion.cs" />
+    <Compile Include="Features\SleepMode.cs" />
+    <Compile Include="Features\SpeedMeter.cs" />
+    <Compile Include="Features\TapTracker.cs" />
+    <Compile Include="Features\Zoomies.cs" />
+    <Compile Include="Utilities\RenderDemand.cs" />
+    <Compile Include="Utilities\UiUtil.cs" />
+    <Compile Include="Utilities\MathUtil.cs" />
     <Compile Include="Utilities\DoorstopUtil.cs" />
-    <Compile Include="Utilities\HarmonyUtil.cs" />
     <Compile Include="Utilities\RuntimeUtil.cs" />
     <Compile Include="Debug\Log.cs" />
     <Compile Include="Debug\TimestampLogHandler.cs" />

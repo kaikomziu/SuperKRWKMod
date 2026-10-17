@@ -10,7 +10,9 @@ namespace CatnipMod.Debug
 
 		public static void SetupTimestampHandler()
 		{
-			UnityEngine.Debug.unityLogger.logHandler = new TimestampLogHandler(UnityEngine.Debug.unityLogger.logHandler);
+			// ILogger.logHandler's setter is stripped from the game's assemblies; the concrete Logger keeps it.
+			if (UnityEngine.Debug.unityLogger is UnityEngine.Logger logger)
+				logger.logHandler = new TimestampLogHandler(logger.logHandler);
 		}
 
 		public static void Info(params object[] messages)

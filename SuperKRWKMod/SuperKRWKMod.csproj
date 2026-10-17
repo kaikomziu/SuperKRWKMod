@@ -124,8 +124,10 @@
     <Compile Include="ModList\ModsSettingsPage.cs" />
     <Compile Include="ModList\ModText.cs" />
     <Compile Include="Utilities\SpriteRasterizer.cs" />
-    <Compile Include="Utilities\EyeCloser.cs" />
-    <Compile Include="Features\SleepyEyes.cs" />
+    <Compile Include="Utilities\CatEyes.cs" />
+    <Compile Include="Features\CatFace.cs" />
+    <Compile Include="Features\ComboDisplay.cs" />
+    <Compile Include="Features\Records.cs" />
     <Compile Include="Utilities\DoorstopUtil.cs" />
     <Compile Include="Utilities\RuntimeUtil.cs" />
     <Compile Include="Debug\Log.cs" />

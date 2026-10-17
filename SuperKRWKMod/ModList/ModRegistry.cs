@@ -20,6 +20,8 @@ namespace SuperKRWKMod.ModList
 		public Func<string> Author;
 		public Func<string> Description;
 		public Func<string> Hotkeys;
+		/// <summary>Optional extra block (e.g. stats), refreshed whenever the page opens.</summary>
+		public Func<string> Details;
 		public readonly List<ModToggle> Toggles = new List<ModToggle>();
 	}
 

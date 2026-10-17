@@ -50,6 +50,26 @@ IdleSeconds=60
 CloseEyes=true
 ; Frame rate cap while asleep and the game is in the background (keeps GPU use low).
 AnimationFps=12
+; Late at night the cat dozes off sooner: NightIdleSeconds between NightStartHour and NightEndHour (0-24).
+NightMode=true
+NightStartHour=23
+NightEndHour=5
+NightIdleSeconds=20
+
+[Eyes]
+; The cat's eyes follow the mouse cursor.
+FollowCursor=true
+; How far the pupils move, in sprite pixels (1-6).
+MaxShift=3
+
+[Combo]
+; Shows x128 COMBO while you keep typing without pausing longer than TimeoutSeconds.
+Enabled=true
+MinCombo=10
+TimeoutSeconds=1
+; Offset from the default position, in UI pixels.
+OffsetX=0
+OffsetY=0
 
 [General]
 ReloadKey=F9
@@ -81,6 +101,33 @@ ReloadKey=F9
 		public float IdleSeconds => Mathf.Max(5f, GetFloat("Sleep", "IdleSeconds", 60f));
 		public bool SleepCloseEyes => GetBool("Sleep", "CloseEyes", true);
 		public int SleepAnimationFps => Mathf.Clamp((int)GetFloat("Sleep", "AnimationFps", 12f), 1, 60);
+		public bool NightMode => GetBool("Sleep", "NightMode", true);
+		public float NightStartHour => GetFloat("Sleep", "NightStartHour", 23f);
+		public float NightEndHour => GetFloat("Sleep", "NightEndHour", 5f);
+		public float NightIdleSeconds => Mathf.Max(5f, GetFloat("Sleep", "NightIdleSeconds", 20f));
+
+		public bool EyesFollowCursor => GetBool("Eyes", "FollowCursor", true);
+		public int EyesMaxShift => (int)GetFloat("Eyes", "MaxShift", 3f);
+
+		public bool ComboEnabled => GetBool("Combo", "Enabled", true);
+		public int ComboMin => Mathf.Max(2, (int)GetFloat("Combo", "MinCombo", 10f));
+		public float ComboTimeout => Mathf.Clamp(GetFloat("Combo", "TimeoutSeconds", 1f), 0.2f, 10f);
+		public float ComboOffsetX => GetFloat("Combo", "OffsetX", 0f);
+		public float ComboOffsetY => GetFloat("Combo", "OffsetY", 0f);
+
+		/// <summary>Whether the local clock is inside the night window (which may wrap past midnight).</summary>
+		public bool IsNight(DateTime now)
+		{
+			float hour = now.Hour + now.Minute / 60f;
+			float start = NightStartHour, end = NightEndHour;
+			return start <= end ? hour >= start && hour < end : hour >= start || hour < end;
+		}
+
+		/// <summary>Idle time before sleeping, shorter at night when NightMode is on.</summary>
+		public float EffectiveIdleSeconds(DateTime now)
+		{
+			return NightMode && IsNight(now) ? Mathf.Min(IdleSeconds, NightIdleSeconds) : IdleSeconds;
+		}
 
 		public KeyCode ReloadKey => GetKey("General", "ReloadKey", KeyCode.F9);
 

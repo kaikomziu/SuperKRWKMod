@@ -2,6 +2,7 @@ using BongoCat;
 using SuperKRWKMod.Config;
 using SuperKRWKMod.Debug;
 using SuperKRWKMod.Utilities;
+using System;
 using TMPro;
 using UnityEngine;
 
@@ -41,7 +42,7 @@ namespace SuperKRWKMod.Features
 			if (_tracker == null)
 				return;
 
-			bool shouldSleep = _config.SleepEnabled && Time.unscaledTime - _tracker.LastTapTime >= _config.IdleSeconds;
+			bool shouldSleep = _config.SleepEnabled && Time.unscaledTime - _tracker.LastTapTime >= _config.EffectiveIdleSeconds(DateTime.Now);
 
 			if (shouldSleep != _asleep)
 			{

@@ -33,6 +33,17 @@ namespace SuperKRWKMod.Utilities
 			return current + (target > current ? maxDelta : -maxDelta);
 		}
 
+		/// <summary>Shortest signed difference between two angles in degrees (-180..180].</summary>
+		public static float DeltaAngle(float current, float target)
+		{
+			float delta = (target - current) % 360f;
+			if (delta > 180f)
+				delta -= 360f;
+			else if (delta <= -180f)
+				delta += 360f;
+			return delta;
+		}
+
 		/// <summary>Hue, saturation, value in 0..1 to an opaque RGB color.</summary>
 		public static Color HsvToRgb(float h, float s, float v)
 		{

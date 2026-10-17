@@ -24,7 +24,10 @@ All features are visual only. The mod listens to taps but never changes the game
 
 - **Zoomies:** type faster than `BounceKps` keys per second and the cat hops and wobbles; past `RainbowKps` it shimmers in rainbow colors.
 - **Speed meter:** current keys per second (KPS), session best and session taps above the cat. Toggle with `F7`.
-- **Sleep mode:** after `IdleSeconds` without input the cat breathes slowly, closes its eyes and floats a "Zzz". Any key wakes it. Eyes are detected automatically, so skins work too.
+- **Sleep mode:** after `IdleSeconds` without input the cat breathes slowly, closes its eyes and floats a "Zzz". Any key wakes it. Late at night (23:00-5:00 by default) it dozes off after `NightIdleSeconds` instead.
+- **Eyes follow the cursor:** the pupils look toward your mouse. Eyes are detected automatically, so skins work too.
+- **Combo counter:** "x128 COMBO" pops up next to the cat while you keep typing without a pause, changing colour at 50 / 100 / 200.
+- **Records:** today's taps, typing time, best KPS and longest combo, all-time bests and the last 7 days, shown on the Mods page and saved in `SuperKRWKModecords.csv`. Counted by the mod only; the game's stats are untouched.
 - **Mod list:** open the game menu → Settings → **Mods** to see installed mods and switch each feature on or off.
 - **Settings:** `SuperKRWKMod\superkrwk.ini` in the game folder is created on first launch. Edit it and press `F9` (with Bongo Cat focused) to reload.
 

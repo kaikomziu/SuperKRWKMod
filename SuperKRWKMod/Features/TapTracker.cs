@@ -1,5 +1,6 @@
 using BongoCat;
 using SuperKRWKMod.Utilities;
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,6 +25,9 @@ namespace SuperKRWKMod.Features
 
 		public float WindowSeconds { get; set; } = 3f;
 
+		/// <summary>Max gap between taps (seconds) that keeps a combo going.</summary>
+		public float ComboTimeout { get; set; } = 1f;
+
 		/// <summary>Keys per second over the recent window.</summary>
 		public float Kps { get; private set; }
 
@@ -31,6 +35,18 @@ namespace SuperKRWKMod.Features
 		public float SmoothKps { get; private set; }
 
 		public float BestKps { get; private set; }
+
+		/// <summary>True once the current burst has filled a whole window, so Kps is a fair reading.</summary>
+		public bool KpsIsSteady { get; private set; }
+
+		/// <summary>Taps in the current unbroken run; 0 once it has lapsed.</summary>
+		public int Combo { get; private set; }
+
+		/// <summary>Length of the last combo that lapsed (for showing its final count).</summary>
+		public int LastCombo { get; private set; }
+
+		/// <summary>Raised for every tap with the amount and the seconds since the previous tap.</summary>
+		public event Action<int, float> Tapped;
 
 		public long SessionTaps { get; private set; }
 
@@ -53,17 +69,26 @@ namespace SuperKRWKMod.Features
 		private void OnTap(int amount)
 		{
 			var now = Time.unscaledTime;
+			float gap = now - LastTapTime;
+			Combo = Combo > 0 && gap <= ComboTimeout ? Combo + amount : amount;
 			if (_samples.Count == 0)
 				_burstStart = now;
 			_samples.Enqueue(new TapSample { Time = now, Amount = amount });
 			_samplesTotal += amount;
 			SessionTaps += amount;
 			LastTapTime = now;
+			Tapped?.Invoke(amount, gap);
 		}
 
 		private void Update()
 		{
 			var now = Time.unscaledTime;
+
+			if (Combo > 0 && now - LastTapTime > ComboTimeout)
+			{
+				LastCombo = Combo;
+				Combo = 0;
+			}
 
 			while (_samples.Count > 0 && now - _samples.Peek().Time > WindowSeconds)
 				_samplesTotal -= _samples.Dequeue().Amount;
@@ -76,7 +101,8 @@ namespace SuperKRWKMod.Features
 
 			Kps = _samplesTotal / span;
 			// Only a full window counts toward the best, so a short opening flurry can't inflate it.
-			if (Kps > BestKps && _samples.Count > 0 && now - _burstStart >= WindowSeconds)
+			KpsIsSteady = _samples.Count > 0 && now - _burstStart >= WindowSeconds;
+			if (Kps > BestKps && KpsIsSteady)
 				BestKps = Kps;
 
 			// Rise fast, fall slower.

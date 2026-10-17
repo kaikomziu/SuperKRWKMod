@@ -157,7 +157,8 @@ namespace SuperKRWKMod.ModList
 				button.interactable = true;
 			_button.interactable = false;
 
-			RefreshToggles();
+			// Rebuild so live details (records) are current.
+			Rebuild();
 			if (_scroll != null)
 				_scroll.verticalNormalizedPosition = 1f;
 		}
@@ -195,6 +196,13 @@ namespace SuperKRWKMod.ModList
 					AddToggle(toggle);
 
 				AddOptionalText(mod.Hotkeys, 0.75f);
+
+				var details = mod.Details?.Invoke();
+				if (!string.IsNullOrEmpty(details))
+				{
+					Clone(_dividerTemplate);
+					AddText(details, 0.75f, TextAlignmentOptions.Left);
+				}
 			}
 
 			RefreshToggles();
@@ -209,7 +217,14 @@ namespace SuperKRWKMod.ModList
 
 		private void AddText(string text, float scale)
 		{
+			AddText(text, scale, null);
+		}
+
+		private void AddText(string text, float scale, TextAlignmentOptions? alignment)
+		{
 			var label = Clone(_textTemplate).GetComponent<TMP_Text>();
+			if (alignment.HasValue)
+				label.alignment = alignment.Value;
 			label.fontSize *= scale;
 			label.textWrappingMode = TextWrappingModes.Normal;
 			SetStaticText(label, text);

@@ -25,6 +25,8 @@ namespace SuperKRWKMod
 		private readonly ModConfig _config = new ModConfig();
 		private TapTracker _tracker;
 		private SpeedMeter _meter;
+		private ComboDisplay _combo;
+		private Records _records;
 
 		private void Awake()
 		{
@@ -66,7 +68,11 @@ namespace SuperKRWKMod
 
 			_tracker = gameObject.AddComponent<TapTracker>();
 			_tracker.WindowSeconds = _config.WindowSeconds;
+			_tracker.ComboTimeout = _config.ComboTimeout;
 			_tracker.Attach(cat);
+
+			_records = gameObject.AddComponent<Records>();
+			_records.Init(_tracker);
 
 			var motion = gameObject.AddComponent<CatMotion>();
 			motion.Attach(visuals);
@@ -76,9 +82,11 @@ namespace SuperKRWKMod
 			sleep.Init(_config, _tracker, motion, ui, counterStyle);
 			var body = cat.transform.Find("Body")?.GetComponent<Image>();
 			if (body != null)
-				gameObject.AddComponent<SleepyEyes>().Init(_config, sleep, body);
+				gameObject.AddComponent<CatFace>().Init(_config, sleep, body);
 			_meter = gameObject.AddComponent<SpeedMeter>();
 			_meter.Init(_config, _tracker, ui, counterStyle);
+			_combo = gameObject.AddComponent<ComboDisplay>();
+			_combo.Init(_config, _tracker, ui, counterStyle);
 
 			Log.InfoT(this, $"Features ready (tint targets: {tintTargets.Count}, counter style: {counterStyle != null}).");
 
@@ -101,28 +109,27 @@ namespace SuperKRWKMod
 				Hotkeys = () => ModText.Get(
 					$"{_config.MeterToggleKey}: show/hide meter   {_config.ReloadKey}: reload superkrwk.ini",
 					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
+				Details = () => _records.Describe(),
 			};
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Zoomies (hop & rainbow)", "ズーミー（ジャンプ＆虹色）"), "Zoomies"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Typing speed meter", "打鍵速度メーター"), "Meter"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Sleep mode (Zzz)", "おやすみモード（Zzz）"), "Sleep"));
-			info.Toggles.Add(new ModToggle
-			{
-				Label = () => ModText.Get("Close eyes while asleep", "寝ているときに目を閉じる"),
-				Get = () => _config.SleepCloseEyes,
-				Set = value => _config.Set("Sleep", "CloseEyes", value ? "true" : "false"),
-			});
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Close eyes while asleep", "寝ているときに目を閉じる"), "Sleep", "CloseEyes"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Doze off sooner late at night", "夜は早めに寝る"), "Sleep", "NightMode"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Eyes follow the cursor", "目でカーソルを追う"), "Eyes", "FollowCursor"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Combo counter", "コンボ表示"), "Combo"));
 			ModRegistry.Register(info);
 		}
 
-		private ModToggle ConfigToggle(Func<string> label, string section)
+		private ModToggle ConfigToggle(Func<string> label, string section, string key = "Enabled")
 		{
 			return new ModToggle
 			{
 				Label = label,
-				Get = () => _config.GetBool(section, "Enabled", true),
+				Get = () => _config.GetBool(section, key, true),
 				Set = value =>
 				{
-					_config.Set(section, "Enabled", value ? "true" : "false");
+					_config.Set(section, key, value ? "true" : "false");
 					ApplyConfig();
 				},
 			};
@@ -131,7 +138,9 @@ namespace SuperKRWKMod
 		private void ApplyConfig()
 		{
 			_tracker.WindowSeconds = _config.WindowSeconds;
+			_tracker.ComboTimeout = _config.ComboTimeout;
 			_meter.ApplyConfig();
+			_combo.ApplyConfig();
 		}
 
 		private void Update()

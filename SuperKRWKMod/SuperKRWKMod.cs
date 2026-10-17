@@ -28,6 +28,7 @@ namespace SuperKRWKMod
 		private ComboDisplay _combo;
 		private Records _records;
 		private AppRules _appRules;
+		private ChestNotice _chest;
 
 		private void Awake()
 		{
@@ -91,6 +92,8 @@ namespace SuperKRWKMod
 			_meter.Init(_config, _tracker, ui, counterStyle);
 			_combo = gameObject.AddComponent<ComboDisplay>();
 			_combo.Init(_config, _tracker, ui, counterStyle);
+			_chest = gameObject.AddComponent<ChestNotice>();
+			_chest.Init(_config, ui, counterStyle);
 
 			_appRules.Changed += OnAppRulesChanged;
 
@@ -115,8 +118,12 @@ namespace SuperKRWKMod
 				Hotkeys = () => ModText.Get(
 					$"{_config.MeterToggleKey}: show/hide meter   {_config.ReloadKey}: reload superkrwk.ini",
 					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
-				BuildExtra = page => _appRules.Build(page),
-				Details = () => _records.Describe(),
+				BuildExtra = page =>
+				{
+					page.Button(ModText.Get("Preview chest notice", "宝箱の通知をテスト"), () => _chest.Preview());
+					_appRules.Build(page);
+				},
+				Details = () => _chest.Describe() + "\n\n" + _records.Describe(),
 			};
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Zoomies (hop & rainbow)", "ズーミー（ジャンプ＆虹色）"), "Zoomies"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Typing speed meter", "打鍵速度メーター"), "Meter"));
@@ -125,6 +132,7 @@ namespace SuperKRWKMod
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Doze off sooner late at night", "夜は早めに寝る"), "Sleep", "NightMode"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Eyes follow the cursor", "目でカーソルを追う"), "Eyes", "FollowCursor"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Combo counter", "コンボ表示"), "Combo"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Chest ready notice", "宝箱が買えたら知らせる"), "Chest"));
 			ModRegistry.Register(info);
 		}
 

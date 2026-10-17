@@ -71,10 +71,20 @@ TimeoutSeconds=1
 OffsetX=0
 OffsetY=0
 
+[Chest]
+; Tell you when a chest can be bought (you still open it yourself).
+Enabled=true
+; Speech bubble above the cat.
+Bubble=true
+; Shake the shop button.
+Shake=true
+; Remind again every N minutes while it stays unopened (0 = only once).
+ReminderMinutes=10
+
 [AppRules]
 ; While one of these apps is running, the listed features are switched off; they come back when it closes.
 ; Format: <exe name>=<features, comma separated>
-; Features: zoomies, rainbow, meter, combo, sleep, eyes, all
+; Features: zoomies, rainbow, meter, combo, sleep, eyes, chest, all
 A Dance of Fire and Ice.exe=rainbow
 
 [General]
@@ -91,6 +101,7 @@ ReloadKey=F9
 		public const string FeatureCombo = "combo";
 		public const string FeatureSleep = "sleep";
 		public const string FeatureEyes = "eyes";
+		public const string FeatureChest = "chest";
 
 		private HashSet<string> _suppressed = new HashSet<string>();
 
@@ -145,6 +156,11 @@ ReloadKey=F9
 		public float ComboTimeout => Mathf.Clamp(GetFloat("Combo", "TimeoutSeconds", 1f), 0.2f, 10f);
 		public float ComboOffsetX => GetFloat("Combo", "OffsetX", 0f);
 		public float ComboOffsetY => GetFloat("Combo", "OffsetY", 0f);
+
+		public bool ChestEnabled => GetBool("Chest", "Enabled", true) && !IsSuppressed(FeatureChest);
+		public bool ChestBubble => GetBool("Chest", "Bubble", true);
+		public bool ChestShake => GetBool("Chest", "Shake", true);
+		public float ChestReminderMinutes => Mathf.Max(0f, GetFloat("Chest", "ReminderMinutes", 10f));
 
 		/// <summary>Whether the local clock is inside the night window (which may wrap past midnight).</summary>
 		public bool IsNight(DateTime now)

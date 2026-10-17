@@ -28,6 +28,7 @@ namespace SuperKRWKMod.Features
 			new[] { ModConfig.FeatureCombo, "Combo", "コンボ" },
 			new[] { ModConfig.FeatureSleep, "Sleep mode", "おやすみ" },
 			new[] { ModConfig.FeatureEyes, "Eye movement", "目の動き" },
+			new[] { ModConfig.FeatureChest, "Chest notice", "宝箱の通知" },
 		};
 
 		private class Rule

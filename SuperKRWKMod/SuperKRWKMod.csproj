@@ -129,6 +129,7 @@
     <Compile Include="Features\ComboDisplay.cs" />
     <Compile Include="Features\Records.cs" />
     <Compile Include="Features\AppRules.cs" />
+    <Compile Include="Features\ChestNotice.cs" />
     <Compile Include="Utilities\ProcessList.cs" />
     <Compile Include="Utilities\DoorstopUtil.cs" />
     <Compile Include="Utilities\RuntimeUtil.cs" />

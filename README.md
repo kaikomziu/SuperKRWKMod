@@ -32,8 +32,8 @@ Hotkeys only work while the Bongo Cat window has focus (click the cat first).
 
 ## Installation
 
-1. Run `build.bat` (see [Developer Setup ↗](docs/DEVELOPER.md))
-2. Find `SuperKRWKMod.zip` in `SuperKRWKMod\bin\`
+1. Go to the [Releases ↗](https://github.com/kaikomziu/SuperKRWKMod/releases) page
+2. Download the latest `SuperKRWKMod.zip` file (or build it yourself with `build.bat`, see [Developer Setup ↗](docs/DEVELOPER.md))
 3. Extract the contents of the zip file
 
 **Automatic Installation (Recommended)**

@@ -1,7 +1,7 @@
 @echo off
 
 echo ========================================
-echo   CatnipMod Build Script
+echo   SuperKRWKMod Build Script
 echo ========================================
 echo.
 
@@ -121,7 +121,7 @@ echo Building Release configuration...
 echo.
 
 REM Build the project in Release configuration
-"%MSBUILD_PATH%" "CatnipMod\CatnipMod.csproj" /p:Configuration=Release /p:Platform=AnyCPU /t:Rebuild /v:minimal
+"%MSBUILD_PATH%" "SuperKRWKMod\SuperKRWKMod.csproj" /p:Configuration=Release /p:Platform=AnyCPU /t:Rebuild /v:minimal
 
 if %ERRORLEVEL% == 0 (
     echo.
@@ -129,13 +129,13 @@ if %ERRORLEVEL% == 0 (
     echo   Build completed successfully!
     echo ========================================
     echo.
-    echo Output location: CatnipMod\bin\Release\
-    echo Zip file: CatnipMod\bin\CatnipMod.zip
+    echo Output location: SuperKRWKMod\bin\Release\
+    echo Zip file: SuperKRWKMod\bin\SuperKRWKMod.zip
     echo.
     echo        /\_/\
     echo       ^(o ^. o^)
 
-    start "" explorer "CatnipMod\bin"
+    start "" explorer "SuperKRWKMod\bin"
 ) else (
     echo.
     echo ========================================

@@ -20,7 +20,7 @@
       "command": "dotnet",
       "args": [
         "msbuild",
-        "CatnipMod\\CatnipMod.csproj",
+        "SuperKRWKMod\\SuperKRWKMod.csproj",
         "/t:Rebuild",
         "/p:Configuration=Release",
         "/p:BuildingInsideVisualStudio=true"

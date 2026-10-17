@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{DF32B9AA-51A1-4AA5-91AA-9A6BDA226B82}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SuperKRWKMod</RootNamespace>
+    <AssemblyName>SuperKRWKMod</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <SteamExecutablePath>$(SteamPath)\steam.exe</SteamExecutablePath>
+    <SteamLaunchArguments>-applaunch $(BongoCatSteamAppId)</SteamLaunchArguments>
+    <BongoCatExecutablePath>$(BongoCatPath)\BongoCat.exe</BongoCatExecutablePath>
+    <BongoCatManagedPath>$(BongoCatPath)\BongoCat_Data\Managed</BongoCatManagedPath>
+    <SuperKRWKModInstallDirName>BongoCat</SuperKRWKModInstallDirName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\$(SuperKRWKModInstallDirName)\$(AssemblyName)\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(SteamExecutablePath)</StartProgram>
+    <StartArguments>$(SteamLaunchArguments)</StartArguments>
+    <StartWorkingDirectory>$(BongoCatPath)</StartWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug %28No Steam%29|AnyCPU'">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\$(SuperKRWKModInstallDirName)\$(AssemblyName)\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(BongoCatExecutablePath)</StartProgram>
+    <StartWorkingDirectory>$(BongoCatPath)</StartWorkingDirectory>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\$(SuperKRWKModInstallDirName)\$(AssemblyName)\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <StartAction>Program</StartAction>
+    <StartProgram>$(SteamExecutablePath)</StartProgram>
+    <StartArguments>$(SteamLaunchArguments)</StartArguments>
+    <StartWorkingDirectory>$(BongoCatPath)</StartWorkingDirectory>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>$(BongoCatManagedPath)\Assembly-CSharp.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="com.rlabrecque.steamworks.net">
+      <HintPath>$(BongoCatManagedPath)\com.rlabrecque.steamworks.net.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.CoreModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.InputLegacyModule">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.InputLegacyModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UI">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.UI.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.UIModule">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.UIModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.TextRenderingModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>$(BongoCatManagedPath)\UnityEngine.ImageConversionModule.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.Localization">
+      <HintPath>$(BongoCatManagedPath)\Unity.Localization.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+    <Reference Include="Unity.TextMeshPro">
+      <HintPath>$(BongoCatManagedPath)\Unity.TextMeshPro.dll</HintPath>
+      <Private>False</Private>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Entrypoint.cs" />
+    <Compile Include="SuperKRWKMod.cs" />
+    <Compile Include="Config\ModConfig.cs" />
+    <Compile Include="Features\CatMotion.cs" />
+    <Compile Include="Features\SleepMode.cs" />
+    <Compile Include="Features\SpeedMeter.cs" />
+    <Compile Include="Features\TapTracker.cs" />
+    <Compile Include="Features\Zoomies.cs" />
+    <Compile Include="Utilities\RenderDemand.cs" />
+    <Compile Include="Utilities\UiUtil.cs" />
+    <Compile Include="Utilities\MathUtil.cs" />
+    <Compile Include="ModList\ModRegistry.cs" />
+    <Compile Include="ModList\ModsSettingsPage.cs" />
+    <Compile Include="Utilities\SpriteRasterizer.cs" />
+    <Compile Include="Utilities\EyeCloser.cs" />
+    <Compile Include="Features\SleepyEyes.cs" />
+    <Compile Include="Utilities\DoorstopUtil.cs" />
+    <Compile Include="Utilities\RuntimeUtil.cs" />
+    <Compile Include="Debug\Log.cs" />
+    <Compile Include="Debug\TimestampLogHandler.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Assets\**\*">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <TargetPath>..\..\%(RecursiveDir)%(Filename)%(Extension)</TargetPath>
+    </Content>
+  </ItemGroup>
+  <Target Name="CopyReadmeToOutput" AfterTargets="Build">
+    <PropertyGroup>
+      <OutputRoot>$(OutputPath)..\..\</OutputRoot>
+    </PropertyGroup>
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\..\README.md" DestinationFiles="$(OutputRoot)README.md" SkipUnchangedFiles="true" />
+  </Target>
+  <Target Name="CreateZip" AfterTargets="CopyReadmeToOutput">
+    <PropertyGroup>
+      <OutputRoot>$(OutputPath)..\..\</OutputRoot>
+      <ZipFileSuffix Condition="'$(Configuration)' != 'Release'">-Debug</ZipFileSuffix>
+    </PropertyGroup>
+    <ZipDirectory SourceDirectory="$(OutputRoot)" DestinationFile="$(OutputRoot)..\$(AssemblyName)$(ZipFileSuffix).zip" Overwrite="true" />
+  </Target>
+  <Target Name="CloseExistingBongoCat" AfterTargets="CreateZip" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
+    <Exec Command="taskkill /F /IM BongoCat.exe &gt;NUL 2&gt;&amp;1" IgnoreExitCode="true" ContinueOnError="true" />
+  </Target>
+  <Target Name="CleanBongoCatModDirectory" AfterTargets="CloseExistingBongoCat" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
+    <PropertyGroup>
+      <SuperKRWKModTargetDir>$(BongoCatPath)\SuperKRWKMod</SuperKRWKModTargetDir>
+    </PropertyGroup>
+    <Message Text="Cleaning SuperKRWKMod directory at $(SuperKRWKModTargetDir)" Importance="high" Condition="Exists('$(SuperKRWKModTargetDir)')" />
+    <RemoveDir Directories="$(SuperKRWKModTargetDir)" Condition="Exists('$(SuperKRWKModTargetDir)')" ContinueOnError="true" />
+  </Target>
+  <Target Name="CopyToBongoCat" AfterTargets="CleanBongoCatModDirectory" Condition="'$(BuildingInsideVisualStudio)' == 'true'">
+    <PropertyGroup>
+      <OutputModRoot>$(OutputPath)..\</OutputModRoot>
+    </PropertyGroup>
+    <ItemGroup>
+      <OutputFiles Include="$(OutputModRoot)**\*.*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(OutputFiles)" DestinationFiles="@(OutputFiles->'$(BongoCatPath)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+    <Message Text="Copied mod files to $(BongoCatPath)" Importance="high" />
+  </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

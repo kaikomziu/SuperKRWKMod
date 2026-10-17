@@ -64,7 +64,7 @@ This document provides instructions for setting up a development environment, bu
    > **Note:** If the `<SteamPath>` doesn't update after editing, try unloading and reloading the project from the `Solution Explorer` pane in Visual Studio.
 
 3. **Open the solution:**
-   - Open `CatnipMod.slnx` in Visual Studio
+   - Open `SuperKRWKMod.slnx` in Visual Studio
 
 ## Building
 
@@ -80,10 +80,10 @@ For users who want to compile the project without opening Visual Studio:
 
 1. Double-click `build.bat` in the project root directory
 2. The script will automatically find MSBuild and build the Release configuration
-3. The compiled files will be in `CatnipMod\bin\Release\`
-4. A zip file will be created at `CatnipMod\bin\CatnipMod.zip`
-5. The output directory (`CatnipMod\bin`) will automatically open in Windows Explorer after a successful build
-6. **Install the mod** by following the [Installation ↗](../README.md#installation) instructions using the files from `CatnipMod\bin\Release\BongoCat\`
+3. The compiled files will be in `SuperKRWKMod\bin\Release\`
+4. A zip file will be created at `SuperKRWKMod\bin\SuperKRWKMod.zip`
+5. The output directory (`SuperKRWKMod\bin`) will automatically open in Windows Explorer after a successful build
+6. **Install the mod** by following the [Installation ↗](../README.md#installation) instructions using the files from `SuperKRWKMod\bin\Release\BongoCat\`
 
 > **Note:** You still need Visual Studio or Visual Studio Build Tools installed for MSBuild to be available. The script will automatically detect MSBuild from common installation paths, including Visual Studio 2017, 2019, 2022, 2025, and 2026 (version 18).
 > 
@@ -95,11 +95,11 @@ For users who want to compile the project without opening Visual Studio:
 2. Build the solution (F6 or Build → Build Solution)
 
 **Build outputs:**
-- Debug builds: `CatnipMod\bin\Debug\`
-- Release builds: `CatnipMod\bin\Release\`
-- Zip files are automatically created in `CatnipMod\bin\` after building
-  - Debug builds create `CatnipMod-Debug.zip`
-  - Release builds create `CatnipMod.zip`
+- Debug builds: `SuperKRWKMod\bin\Debug\`
+- Release builds: `SuperKRWKMod\bin\Release\`
+- Zip files are automatically created in `SuperKRWKMod\bin\` after building
+  - Debug builds create `SuperKRWKMod-Debug.zip`
+  - Release builds create `SuperKRWKMod.zip`
 
 **Automatic deployment:**
 - After building, `BongoCat.exe` is automatically closed if running
@@ -110,12 +110,12 @@ For users who want to compile the project without opening Visual Studio:
 ## Project Structure
 
 ```
-CatnipMod/
-├── CatnipMod.cs          # Main mod class
+SuperKRWKMod/
+├── SuperKRWKMod.cs          # Main mod class
 ├── Entrypoint.cs         # UnityDoorstop entry point (runs when game starts)
 ├── Assets/
 │   ├── BongoCat/         # Mod files organized for release
-│   │   ├── CatnipMod/
+│   │   ├── SuperKRWKMod/
 │   │   │   └── ...              # Mod assets
 │   │   ├── doorstop_config.ini  # UnityDoorstop configuration
 │   │   └── winhttp.dll          # UnityDoorstop loader
@@ -127,14 +127,14 @@ CatnipMod/
 
 ## Development Workflow
 
-1. **Make your changes** in `CatnipMod.cs` or `Entrypoint.cs`
+1. **Make your changes** in `SuperKRWKMod.cs` or `Entrypoint.cs`
 2. **Build the project** (files are automatically copied to the game directory)
 3. **Launch the game** to test your changes
 
 ## Key Files
 
 - **`Entrypoint.cs`** - This is where your mod code runs when the game starts. The `Start()` method is called by UnityDoorstop before the game's main code executes.
-- **`CatnipMod.cs`** - Main mod class where you can add your mod functionality.
+- **`SuperKRWKMod.cs`** - Main mod class where you can add your mod functionality.
 - **`doorstop_config.ini`** - Configures UnityDoorstop to load your mod DLL.
 - **`install.bat`** - Automated installation script that:
   - Automatically detects Bongo Cat installation path from Windows registry

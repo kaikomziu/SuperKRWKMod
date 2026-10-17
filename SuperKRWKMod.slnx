@@ -1,0 +1,8 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="Debug (No Steam)" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="SuperKRWKMod/SuperKRWKMod.csproj" Id="df32b9aa-51a1-4aa5-91aa-9a6bda226b82" />
+</Solution>

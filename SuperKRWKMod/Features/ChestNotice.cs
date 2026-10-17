@@ -3,6 +3,7 @@ using SuperKRWKMod.Config;
 using SuperKRWKMod.Debug;
 using SuperKRWKMod.ModList;
 using SuperKRWKMod.Utilities;
+using System.Globalization;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -262,7 +263,7 @@ namespace SuperKRWKMod.Features
 			var item = shop.GetComponentInChildren<ShopItem>(true);
 			int missing = item != null ? MissingPets(item.Price) : -1;
 			sb.Append(missing > 0
-				? ModText.Get($"{missing:#,0} to go", $"あと{missing:#,0}")
+				? ModText.Format("{0} to go", "あと{0}", missing.ToString("#,0", CultureInfo.InvariantCulture))
 				: ModText.Get("out", "出てるよ"));
 		}
 
@@ -302,7 +303,7 @@ namespace SuperKRWKMod.Features
 			_countdownText = null;
 			if (editing)
 			{
-				_countdown.text = ModText.Get("Chest 12:34\nEmote 12:34", "宝箱 12:34\nエモート 12:34");
+				_countdown.text = ModText.Get("Chest", "宝箱") + " 12:34\n" + ModText.Get("Emote", "エモート") + " 12:34";
 				_countdownBox.gameObject.SetActive(true);
 			}
 			else

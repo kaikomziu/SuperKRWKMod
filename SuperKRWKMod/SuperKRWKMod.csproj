@@ -125,6 +125,7 @@
     <Compile Include="ModList\CustomSettingsPage.cs" />
     <Compile Include="ModList\ModListContent.cs" />
     <Compile Include="ModList\ModText.cs" />
+    <Compile Include="ModList\Translations.cs" />
     <Compile Include="Utilities\SpriteRasterizer.cs" />
     <Compile Include="Utilities\CatEyes.cs" />
     <Compile Include="Features\CatFace.cs" />
@@ -150,6 +151,7 @@
       <OutputRoot>$(OutputPath)..\..\</OutputRoot>
     </PropertyGroup>
     <Copy SourceFiles="$(MSBuildProjectDirectory)\..\README.md" DestinationFiles="$(OutputRoot)README.md" SkipUnchangedFiles="true" />
+    <Copy SourceFiles="$(MSBuildProjectDirectory)\..\README.ja.md" DestinationFiles="$(OutputRoot)README.ja.md" SkipUnchangedFiles="true" />
   </Target>
   <Target Name="CreateZip" AfterTargets="CopyReadmeToOutput">
     <PropertyGroup>

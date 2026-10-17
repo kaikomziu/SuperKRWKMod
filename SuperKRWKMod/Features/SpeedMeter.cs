@@ -1,5 +1,6 @@
 using BongoCat;
 using SuperKRWKMod.Config;
+using SuperKRWKMod.ModList;
 using SuperKRWKMod.Utilities;
 using System.Globalization;
 using TMPro;
@@ -64,7 +65,8 @@ namespace SuperKRWKMod.Features
 
 			var kps = _tracker.Kps.ToString("0.0", CultureInfo.InvariantCulture);
 			var best = _tracker.BestKps.ToString("0.0", CultureInfo.InvariantCulture);
-			var text = $"<b>{kps}</b> <size=70%>KPS</size>\n<size=65%>best {best} | {_tracker.SessionTaps:#,0} taps</size>";
+			var stats = ModText.Format("best {0} | {1} taps", "最高 {0} | {1} タップ", best, _tracker.SessionTaps.ToString("#,0", CultureInfo.InvariantCulture));
+			var text = $"<b>{kps}</b> <size=70%>KPS</size>\n<size=65%>{stats}</size>";
 
 			if (text != _lastText)
 			{

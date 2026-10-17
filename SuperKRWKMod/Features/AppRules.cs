@@ -218,14 +218,14 @@ namespace SuperKRWKMod.Features
 				var r = rule;
 				bool running = _activeApps.Contains(r.App);
 				page.Text((running ? "<color=#3a9a4a>●</color> " : "○ ") + "<b>" + DisplayApp(r.App) + "</b>"
-					+ (running ? ModText.Get("  (running now)", "（起動中）") : ""), 0.85f, true);
+					+ (running ? ModText.Get(" (running now)", "（起動中）") : ""), 0.85f, true);
 
 				foreach (var names in FeatureNames)
 				{
 					var feature = names[0];
 					page.Toggle(new ModToggle
 					{
-						Label = () => ModText.Get(names[1] + " off", names[2] + "をオフ"),
+						Label = () => ModText.Format("{0} off", "{0}をオフ", ModText.Get(names[1], names[2])),
 						Get = () => r.Features.Contains(feature),
 						Set = value => SetFeature(r, feature, value),
 					});

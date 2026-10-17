@@ -105,6 +105,8 @@ A Dance of Fire and Ice.exe=rainbow
 
 [General]
 ReloadKey=F9
+; Language of the mod's text: auto (follow the game) or a code such as en, ja, zh-CN, ko, es, fr, de...
+Language=auto
 ";
 
 		private readonly Dictionary<string, string> _values = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
@@ -214,6 +216,7 @@ ReloadKey=F9
 			return NightMode && IsNight(now) ? Mathf.Min(IdleSeconds, NightIdleSeconds) : IdleSeconds;
 		}
 
+		public string Language => Get("General", "Language") ?? "auto";
 		public KeyCode ReloadKey => GetKey("General", "ReloadKey", KeyCode.F9);
 
 		public void Load()

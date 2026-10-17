@@ -131,9 +131,10 @@ namespace SuperKRWKMod
 				Version = Version,
 				Author = () => ModText.Get("by KRWK (based on Catnip Mod by Shilo)", "作者: KRWK（ShiloさんのCatnip Modがベース）"),
 				Description = () => ModText.Get("Visual-only fun. Never changes taps, stats or items.", "見た目だけの改造です。タップ数・統計・アイテムは一切変更しません。"),
-				Hotkeys = () => ModText.Get(
-					$"{_config.MeterToggleKey}: show/hide meter   {_config.ReloadKey}: reload superkrwk.ini",
-					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
+				Hotkeys = () => ModText.Format(
+					"{0}: show/hide meter   {1}: reload superkrwk.ini",
+					"{0}: メーター表示切替   {1}: superkrwk.ini 再読込",
+					_config.MeterToggleKey, _config.ReloadKey),
 				BuildExtra = page =>
 				{
 					page.Toggle(ConfigToggle(() => ModText.Get("Box behind meter and countdown", "メーターとカウントダウンに背景の枠"), "Text", "Background"));
@@ -202,6 +203,7 @@ namespace SuperKRWKMod
 
 		private void ApplyTextStyle()
 		{
+			ModText.SetOverride(_config.Language);
 			TextStyle.Configure(_config.TextOutline, _config.TextOutlineColor, _config.TextOutlineWidth, _config.TextScale, _config.TextBackground);
 		}
 
@@ -230,7 +232,7 @@ namespace SuperKRWKMod
 		{
 			int i = CurrentOutlinePreset();
 			var name = i >= 0 ? ModText.Get(OutlinePresets[i][1], OutlinePresets[i][2]) : _config.TextOutlineColorName;
-			return ModText.Get($"Text outline: {name}", $"文字の縁取り: {name}");
+			return ModText.Format("Text outline: {0}", "文字の縁取り: {0}", name);
 		}
 
 		private static readonly float[] ScalePresets = { 1f, 1.25f, 1.5f, 1.75f };
@@ -250,13 +252,13 @@ namespace SuperKRWKMod
 		private string ScaleButtonLabel()
 		{
 			var name = ScaleNames[Nearest(ScalePresets, _config.TextScale)];
-			return ModText.Get($"Text size: {name[0]}", $"文字の大きさ: {name[1]}");
+			return ModText.Format("Text size: {0}", "文字の大きさ: {0}", ModText.Get(name[0], name[1]));
 		}
 
 		private string WidthButtonLabel()
 		{
 			var name = WidthNames[Nearest(WidthPresets, _config.TextOutlineWidth)];
-			return ModText.Get($"Outline thickness: {name[0]}", $"縁取りの太さ: {name[1]}");
+			return ModText.Format("Outline thickness: {0}", "縁取りの太さ: {0}", ModText.Get(name[0], name[1]));
 		}
 
 		private void Cycle(string key, float[] presets, float current)

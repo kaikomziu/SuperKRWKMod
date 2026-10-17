@@ -126,20 +126,16 @@ namespace SuperKRWKMod.Features
 
 			var sb = new StringBuilder();
 
-			sb.Append(ModText.Get("Today: ", "今日: "))
-				.Append(Number(today.Taps)).Append(ModText.Get(" taps", " タップ"))
-				.Append(ModText.Get(" / typing ", " / 打っていた時間 ")).Append(Duration(today.ActiveSeconds)).Append('\n');
-			sb.Append(ModText.Get("Today's best: ", "今日の最高: "))
-				.Append(Kps(today.BestKps)).Append(" KPS / ")
-				.Append(ModText.Get("combo ", "コンボ ")).Append(Number(today.BestCombo)).Append('\n');
-			sb.Append(ModText.Get("All time: ", "これまで: "))
-				.Append(Number(totalTaps)).Append(ModText.Get(" taps", " タップ"))
-				.Append(" / ").Append(Kps(allBestKps)).Append(" KPS / ")
-				.Append(ModText.Get("combo ", "コンボ ")).Append(Number(allBestCombo));
+			sb.Append(ModText.Format("Today: {0} taps / typing {1}", "今日: {0} タップ / 打っていた時間 {1}",
+				Number(today.Taps), Duration(today.ActiveSeconds))).Append('\n');
+			sb.Append(ModText.Format("Today's best: {0} KPS / combo {1}", "今日の最高: {0} KPS / コンボ {1}",
+				Kps(today.BestKps), Number(today.BestCombo))).Append('\n');
+			sb.Append(ModText.Format("All time: {0} taps / {1} KPS / combo {2}", "これまで: {0} タップ / {1} KPS / コンボ {2}",
+				Number(totalTaps), Kps(allBestKps), Number(allBestCombo)));
 			if (bestDay != null && bestDay.Taps > 0)
 			{
-				sb.Append('\n').Append(ModText.Get("Best day: ", "一番打った日: "))
-					.Append(ShortDate(bestDay.Date)).Append(' ').Append(Number(bestDay.Taps)).Append(ModText.Get(" taps", " タップ"));
+				sb.Append('\n').Append(ModText.Format("Best day: {0} {1} taps", "一番打った日: {0} {1} タップ",
+					ShortDate(bestDay.Date), Number(bestDay.Taps)));
 			}
 
 			// Last 7 days, newest first.
@@ -179,10 +175,10 @@ namespace SuperKRWKMod.Features
 			int hours = minutes / 60;
 			minutes %= 60;
 			if (hours > 0)
-				return ModText.Get($"{hours}h {minutes}m", $"{hours}時間{minutes}分");
+				return ModText.Format("{0}h {1}m", "{0}時間{1}分", hours, minutes);
 			if (minutes == 0 && seconds > 0f)
 				return ModText.Get("<1m", "1分未満");
-			return ModText.Get($"{minutes}m", $"{minutes}分");
+			return ModText.Format("{0}m", "{0}分", minutes);
 		}
 
 		private void Load()

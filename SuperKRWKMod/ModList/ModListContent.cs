@@ -8,7 +8,7 @@ namespace SuperKRWKMod.ModList
 		public static void Build(IModPageBuilder page)
 		{
 			int count = ModRegistry.Mods.Count;
-			page.Text(ModText.Get($"{count} mod(s) installed", $"{count}個のMODが導入されています"));
+			page.Text(ModText.Format("{0} mod(s) installed", "{0}個のMODが導入されています", count));
 
 			foreach (var mod in ModRegistry.Mods)
 			{

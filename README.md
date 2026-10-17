@@ -1,16 +1,22 @@
 # SuperKRWKMod
 
+**English** | [日本語](README.ja.md)
+
 ![Bongo Cat Logo](SuperKRWKMod/Assets/BongoCat/SuperKRWKMod/logo.png)
 
-> Visual-only mod for [Bongo Cat](#bongo-cat-game-): zoomies, a typing speed meter and a sleepy cat. Free, safe, and no cheats.
+> Visual-only mod for [Bongo Cat](#bongo-cat-game-): zoomies, cursor-following eyes, a sleepy cat, a typing speed meter, combos, chest notices and typing records. Free, safe, and no cheats.
 
 Based on [Bongo Cat Catnip Mod ↗](https://github.com/Shilo/bongo-cat-catnip-mod/) by Shilo.
 
-This mod extends the [Bongo Cat](#bongo-cat-game-) game with additional features and improvements by modifying the game's code while it runs, without changing the original game files.
+| Speed meter and chest countdown | Settings → Mods |
+|---|---|
+| ![Speed meter and chest countdown](docs/images/meter-and-countdown.png) | ![Mods settings page](docs/images/mods-page.png) |
 
 ## Table of Contents
 
 - [Features](#features)
+- [Languages](#languages)
+- [Safety](#safety)
 - [Installation](#installation)
   - [Verification](#verification)
   - [Uninstallation](#uninstallation)
@@ -20,23 +26,35 @@ This mod extends the [Bongo Cat](#bongo-cat-game-) game with additional features
 
 ## Features
 
-All features are visual only. The mod listens to taps but never changes the game's counters, Steam stats, items or drops.
+All features are visual only. The mod listens to taps but never changes the game's counters, Steam stats, items or drops. Everything can be switched on or off in game under **Settings → Mods**.
 
-- **Zoomies:** type faster than `BounceKps` keys per second and the cat hops and wobbles; past `RainbowKps` it shimmers in rainbow colors.
+- **Zoomies:** type faster than `BounceKps` keys per second and the cat hops and wobbles; past `RainbowKps` it shimmers in rainbow colours.
 - **Speed meter:** current keys per second (KPS), session best and session taps above the cat. Toggle with `F7`.
-- **Sleep mode:** after `IdleSeconds` without input the cat breathes slowly, closes its eyes and floats a "Zzz". Any key wakes it. Late at night (23:00-5:00 by default) it dozes off after `NightIdleSeconds` instead.
 - **Eyes follow the cursor:** the pupils look toward your mouse. Eyes are detected automatically, so skins work too.
-- **Combo counter:** "x128 COMBO" pops up next to the cat while you keep typing without a pause, changing colour at 50 / 100 / 200.
-- **Records:** today's taps, typing time, best KPS and longest combo, all-time bests and the last 7 days, on their own Settings → Records page and saved in `SuperKRWKMod
-ecords.csv`. Counted by the mod only; the game's stats are untouched.
-- **Chest notice:** a speech bubble from the cat ("Chest ready!", only while a chest is out) and a shake of the shop button when you have enough taps for a chest, with a reminder every `ReminderMinutes`. A small countdown left of the combo counter shows when the next chest appears, or how many taps are still missing. You still open chests yourself: the mod only reads the game's state and never buys or opens anything.
-- **Move the text:** Settings → Mods → "Move the text (drag)" shows the meter, chest countdown, combo and Zzz with orange frames; drag them anywhere and click the banner (or press Enter) to save. "Reset text positions" puts them back.
-- **Readable text:** the mod's on-screen text has an outline. Change its colour on the Mods page ("Text outline": white, black, pink, sky blue, yellow or none) or set any `#RRGGBB` as `OutlineColor` under `[Text]`.
-- **App rules:** switch features off while a given app is running, and back on when it closes. Edit them in game under Settings → Mods → App rules: "+ Add from running apps" lists apps with an open window, then tick the features to switch off. They are stored in `superkrwk.ini`; for example `A Dance of Fire and Ice.exe=rainbow` under `[AppRules]` in `superkrwk.ini` turns off the rainbow glow while playing ADOFAI. Features: `zoomies`, `rainbow`, `meter`, `combo`, `sleep`, `eyes`, `all`. Only app names are checked, locally.
-- **Mod list:** open the game menu → Settings → **Mods** to see installed mods and switch each feature on or off.
-- **Settings:** `SuperKRWKMod\superkrwk.ini` in the game folder is created on first launch. Edit it and press `F9` (with Bongo Cat focused) to reload.
+- **Sleep mode:** after `IdleSeconds` without input the cat breathes slowly, closes its eyes and floats a "Zzz". Any key wakes it. Late at night (23:00–5:00 by default) it dozes off after `NightIdleSeconds` instead.
+- **Combo counter:** "×128 COMBO" pops up next to the cat while you keep typing without a pause, changing colour at 50 / 100 / 200.
+- **Chest notice:** a speech bubble from the cat ("Chest ready!", only while a chest is out) and a shake of the shop button when you have enough taps for a chest, with a reminder every `ReminderMinutes`. A small countdown next to the combo shows when the next chest appears, or how many taps are still missing. You still open chests yourself: the mod only reads the game's state and never buys or opens anything.
+- **Records:** today's taps, typing time, best KPS and longest combo, all-time bests and the last 7 days, on their own **Settings → Records** page. Saved in `SuperKRWKMod\records.csv` and counted by the mod only.
+- **App rules:** switch features off while a given app is running, and back on when it closes (for example, no rainbow glow while playing a rhythm game). In game: **Settings → Mods → App rules → "+ Add from running apps"**, then tick the features to switch off. Only app names are checked, locally.
+- **Readable, movable text:** the meter and countdown sit in a box like the game's counter; other text has an outline. Text size, outline colour and thickness are set on the Mods page, and **"Move the text (drag)"** lets you drag each piece of text anywhere.
+- **Settings file:** `SuperKRWKMod\superkrwk.ini` in the game folder is created on first launch. Edit it and press `F9` (with Bongo Cat focused) to reload.
 
 Hotkeys only work while the Bongo Cat window has focus (click the cat first).
+
+## Languages
+
+The mod's text follows the game's language setting. Supported: English, Japanese, Chinese (Simplified / Traditional), Korean, Spanish, French, German, Portuguese, Russian, Italian, Polish, Turkish, Ukrainian, Dutch, Czech, Danish, Finnish, Greek, Hungarian, Norwegian, Romanian and Swedish. Hebrew uses English for now.
+
+To force a language, set `Language=` under `[General]` in `superkrwk.ini` (e.g. `Language=en`; `auto` follows the game). Translation fixes are welcome: see [`Translations.cs`](SuperKRWKMod/ModList/Translations.cs).
+
+## Safety
+
+- **No network access.** The mod never connects to the internet.
+- **Visual only.** It never changes taps, Steam stats, items or drops, and never buys or opens chests. In multiplayer, other players see your normal cat; the mod sends nothing.
+- **Local files only.** It writes only inside the game folder (`SuperKRWKMod\superkrwk.ini` and `records.csv`).
+- **App rules** read the names of running apps on your PC to switch features; names are not stored anywhere except the rules you add, and never leave your PC.
+- **Open source.** All code is in this repository. The bundled `winhttp.dll` is the official [UnityDoorstop v4.4.1](https://github.com/NeighTools/UnityDoorstop/releases/tag/v4.4.1) loader (Windows x64 verbose build, SHA-256 `1018c7eb5f03ee359d1479d3648b16224794119c43092673fef2ff85dd3eb46d`).
+- Some antivirus software may warn about `winhttp.dll`, because loading a mod into a game this way looks similar to other DLL injection. The file is the unmodified official one above.
 
 ## Installation
 
@@ -67,7 +85,7 @@ BongoCat/
 ├── BongoCat.exe
 ├── winhttp.dll          ← Mod file
 ├── doorstop_config.ini  ← Mod file
-├── SuperKRWKMod/           ← Mod folder
+├── SuperKRWKMod/        ← Mod folder
 │   ├── SuperKRWKMod.dll
 │   └── ... (mod assets)
 └── ... (other game files)
@@ -77,7 +95,7 @@ BongoCat/
 
 ### Verification
 
-Open `%USERPROFILE%\AppData\LocalLow\Irox Games\BongoCat\Player.log` after launching. It should contain `[SuperKRWKMod] SuperKRWKMod | Features ready`.
+Open `%USERPROFILE%\AppData\LocalLow\Irox Games\BongoCat\Player.log` after launching. It should contain `[SuperKRWKMod] SuperKRWKMod | Features ready`. In game, **Settings** should have **Mods** and **Records** categories.
 
 ### Uninstallation
 

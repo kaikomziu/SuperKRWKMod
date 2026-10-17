@@ -10,6 +10,7 @@ This document provides instructions for setting up a development environment, bu
 - [Building](#building)
 - [Project Structure](#project-structure)
 - [Development Workflow](#development-workflow)
+- [Releasing](#releasing)
 - [Key Files](#key-files)
 - [Third-Party Libraries](#third-party-libraries)
   - [UnityDoorstop](#unitydoorstop--winhttpdll)
@@ -130,6 +131,18 @@ SuperKRWKMod/
 1. **Make your changes** in `SuperKRWKMod.cs` or `Entrypoint.cs`
 2. **Build the project** (files are automatically copied to the game directory)
 3. **Launch the game** to test your changes
+
+## Releasing
+
+Every update is published as a new GitHub release with `release.ps1` (needs `gh` logged in):
+
+```powershell
+pwsh ./release.ps1              # patch bump, e.g. 0.3.0 -> 0.3.1
+pwsh ./release.ps1 -Bump minor  # 0.3.1 -> 0.4.0
+pwsh ./release.ps1 -DryRun      # build and check only
+```
+
+The script bumps the version, builds without debug symbols, runs `tools/RefCheck` (fails if the DLL uses an API stripped from the game's assemblies), then commits, tags, pushes and creates the release with `SuperKRWKMod.zip`. The game's DLLs can't be redistributed, so releases are built locally rather than in CI.
 
 ## Key Files
 

@@ -22,8 +22,8 @@ This mod extends the [Bongo Cat](#bongo-cat-game-) game with additional features
 
 All features are visual only. The mod listens to taps but never changes the game's counters, Steam stats, items or drops.
 
-- **Zoomies:** type faster than `BounceKpm` and the cat hops and wobbles; past `RainbowKpm` it shimmers in rainbow colors.
-- **Speed meter:** current keys per minute, session best and session taps above the cat. Toggle with `F7`.
+- **Zoomies:** type faster than `BounceKps` keys per second and the cat hops and wobbles; past `RainbowKps` it shimmers in rainbow colors.
+- **Speed meter:** current keys per second (KPS), session best and session taps above the cat. Toggle with `F7`.
 - **Sleep mode:** after `IdleSeconds` without input the cat breathes slowly, closes its eyes and floats a "Zzz". Any key wakes it. Eyes are detected automatically, so skins work too.
 - **Mod list:** open the game menu → Settings → **Mods** to see installed mods and switch each feature on or off.
 - **Settings:** `SuperKRWKMod\superkrwk.ini` in the game folder is created on first launch. Edit it and press `F9` (with Bongo Cat focused) to reload.

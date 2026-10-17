@@ -19,10 +19,10 @@ namespace SuperKRWKMod.Config
 ; Visual only: nothing here changes taps, stats, items or drops.
 
 [Zoomies]
-; Cat hops when typing faster than BounceKpm and glows rainbow above RainbowKpm.
+; Cat hops when typing faster than BounceKps (keys per second) and glows rainbow above RainbowKps.
 Enabled=true
-BounceKpm=250
-RainbowKpm=450
+BounceKps=4
+RainbowKps=7.5
 ; Hop height in UI pixels at full intensity.
 BounceHeight=10
 ; Max tilt wobble in degrees at full intensity.
@@ -39,7 +39,7 @@ ToggleKey=F7
 OffsetX=0
 OffsetY=0
 FontSize=11
-; Seconds of history used to compute keys per minute.
+; Seconds of history used to compute keys per second.
 WindowSeconds=3
 
 [Sleep]
@@ -62,8 +62,9 @@ ReloadKey=F9
 		public static string FilePath => Path.Combine(ModDirectory, FileName);
 
 		public bool ZoomiesEnabled => GetBool("Zoomies", "Enabled", true);
-		public float BounceKpm => GetFloat("Zoomies", "BounceKpm", 250f);
-		public float RainbowKpm => GetFloat("Zoomies", "RainbowKpm", 450f);
+		// Older configs used keys per minute (BounceKpm/RainbowKpm); still honoured.
+		public float BounceKps => GetFloat("Zoomies", "BounceKps", GetFloat("Zoomies", "BounceKpm", 240f) / 60f);
+		public float RainbowKps => GetFloat("Zoomies", "RainbowKps", GetFloat("Zoomies", "RainbowKpm", 450f) / 60f);
 		public float BounceHeight => GetFloat("Zoomies", "BounceHeight", 10f);
 		public float WobbleDegrees => GetFloat("Zoomies", "WobbleDegrees", 6f);
 		public float RainbowStrength => Mathf.Clamp01(GetFloat("Zoomies", "RainbowStrength", 0.65f));

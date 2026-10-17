@@ -37,12 +37,12 @@ namespace SuperKRWKMod.Features
 				return;
 
 			bool enabled = _config.ZoomiesEnabled;
-			float kpm = _tracker.SmoothKpm;
-			float bounceKpm = _config.BounceKpm;
-			float rainbowKpm = Mathf.Max(_config.RainbowKpm, bounceKpm + 1f);
+			float kps = _tracker.SmoothKps;
+			float bounceKps = _config.BounceKps;
+			float rainbowKps = Mathf.Max(_config.RainbowKps, bounceKps + 0.1f);
 
-			float targetIntensity = enabled ? Mathf.Clamp01((kpm - bounceKpm) / (rainbowKpm - bounceKpm) * 0.7f + (kpm >= bounceKpm ? 0.3f : 0f)) : 0f;
-			float targetRainbow = enabled ? Mathf.Clamp01((kpm - rainbowKpm) / 60f) : 0f;
+			float targetIntensity = enabled ? Mathf.Clamp01((kps - bounceKps) / (rainbowKps - bounceKps) * 0.7f + (kps >= bounceKps ? 0.3f : 0f)) : 0f;
+			float targetRainbow = enabled ? Mathf.Clamp01((kps - rainbowKps) / 1f) : 0f;
 
 			float dt = Time.unscaledDeltaTime;
 			_intensity = MathUtil.MoveTowards(_intensity, targetIntensity, dt * 2.5f);

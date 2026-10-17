@@ -24,13 +24,13 @@ namespace SuperKRWKMod.Features
 
 		public float WindowSeconds { get; set; } = 3f;
 
-		/// <summary>Keys per minute over the recent window.</summary>
-		public float Kpm { get; private set; }
+		/// <summary>Keys per second over the recent window.</summary>
+		public float Kps { get; private set; }
 
-		/// <summary>Kpm eased toward its target so effects don't flicker between taps.</summary>
-		public float SmoothKpm { get; private set; }
+		/// <summary>Kps eased toward its target so effects don't flicker between taps.</summary>
+		public float SmoothKps { get; private set; }
 
-		public float BestKpm { get; private set; }
+		public float BestKps { get; private set; }
 
 		public long SessionTaps { get; private set; }
 
@@ -74,14 +74,14 @@ namespace SuperKRWKMod.Features
 			if (_samples.Count > 0)
 				span = Mathf.Clamp(now - _samples.Peek().Time, 1f, WindowSeconds);
 
-			Kpm = _samplesTotal * 60f / span;
+			Kps = _samplesTotal / span;
 			// Only a full window counts toward the best, so a short opening flurry can't inflate it.
-			if (Kpm > BestKpm && _samples.Count > 0 && now - _burstStart >= WindowSeconds)
-				BestKpm = Kpm;
+			if (Kps > BestKps && _samples.Count > 0 && now - _burstStart >= WindowSeconds)
+				BestKps = Kps;
 
 			// Rise fast, fall slower.
-			float rate = Kpm > SmoothKpm ? 6f : 1.5f;
-			SmoothKpm = Mathf.Lerp(SmoothKpm, Kpm, 1f - MathUtil.Exp(-rate * Time.unscaledDeltaTime));
+			float rate = Kps > SmoothKps ? 6f : 1.5f;
+			SmoothKps = Mathf.Lerp(SmoothKps, Kps, 1f - MathUtil.Exp(-rate * Time.unscaledDeltaTime));
 		}
 	}
 }

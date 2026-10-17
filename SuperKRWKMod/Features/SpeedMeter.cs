@@ -1,13 +1,14 @@
 using BongoCat;
 using SuperKRWKMod.Config;
 using SuperKRWKMod.Utilities;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 
 namespace SuperKRWKMod.Features
 {
 	/// <summary>
-	/// Small typing speed readout above the cat: current KPM, session best and session taps.
+	/// Small typing speed readout above the cat: current keys per second, session best and session taps.
 	/// </summary>
 	public class SpeedMeter : MonoBehaviour
 	{
@@ -58,9 +59,9 @@ namespace SuperKRWKMod.Features
 
 			_nextRefresh = Time.unscaledTime + RefreshInterval;
 
-			int kpm = Mathf.RoundToInt(_tracker.Kpm);
-			int best = Mathf.RoundToInt(_tracker.BestKpm);
-			var text = $"<b>{kpm}</b> <size=70%>KPM</size>\n<size=65%>best {best} | {_tracker.SessionTaps:#,0} taps</size>";
+			var kps = _tracker.Kps.ToString("0.0", CultureInfo.InvariantCulture);
+			var best = _tracker.BestKps.ToString("0.0", CultureInfo.InvariantCulture);
+			var text = $"<b>{kps}</b> <size=70%>KPS</size>\n<size=65%>best {best} | {_tracker.SessionTaps:#,0} taps</size>";
 
 			if (text != _lastText)
 			{

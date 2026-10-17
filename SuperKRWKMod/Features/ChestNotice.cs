@@ -15,7 +15,7 @@ namespace SuperKRWKMod.Features
 	/// shop button. Opening the chest is always left to you; this only reads the game's state
 	/// (chest ready, price, whether the pets cover it) and never spends anything.
 	/// </summary>
-	public class ChestNotice : MonoBehaviour
+	public class ChestNotice : MonoBehaviour, IMovableText
 	{
 		// Right edge just left of the combo counter (see ComboDisplay); the box grows leftwards.
 		private static readonly Vector2 CountdownPosition = new Vector2(-112f, 82f);
@@ -41,6 +41,7 @@ namespace SuperKRWKMod.Features
 		private TextMeshProUGUI _countdown;
 		private RectTransform _countdownBox;
 		private string _countdownText;
+		private bool _editing;
 		private readonly RenderDemand _render = new RenderDemand();
 		private Watched _normal;
 		private Watched _emote;
@@ -119,7 +120,7 @@ namespace SuperKRWKMod.Features
 
 		private void UpdateCountdown()
 		{
-			bool show = _config.ChestEnabled && _config.ChestCountdown && (Shop.NormalShop != null || Shop.EmoteShop != null);
+			bool show = _editing || (_config.ChestEnabled && _config.ChestCountdown && (Shop.NormalShop != null || Shop.EmoteShop != null));
 			if (!show)
 			{
 				if (_countdownBox.gameObject.activeSelf)
@@ -285,6 +286,29 @@ namespace SuperKRWKMod.Features
 					high = mid - 1;
 			}
 			return price - low;
+		}
+
+		// --- IMovableText (layout editor) ---------------------------------------------------------
+
+		public RectTransform LayoutTarget => _countdownBox;
+		public Vector2 LayoutBase => CountdownPosition;
+		public string LayoutSection => "Chest";
+		public string LayoutKeyX => "CountdownOffsetX";
+		public string LayoutKeyY => "CountdownOffsetY";
+
+		public void SetEditing(bool editing)
+		{
+			_editing = editing;
+			_countdownText = null;
+			if (editing)
+			{
+				_countdown.text = ModText.Get("Chest 12:34\nEmote 12:34", "宝箱 12:34\nエモート 12:34");
+				_countdownBox.gameObject.SetActive(true);
+			}
+			else
+			{
+				ApplyConfig();
+			}
 		}
 
 		private void OnDisable()

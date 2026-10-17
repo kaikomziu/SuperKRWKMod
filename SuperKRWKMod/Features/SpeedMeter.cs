@@ -10,7 +10,7 @@ namespace SuperKRWKMod.Features
 	/// <summary>
 	/// Small typing speed readout above the cat: current keys per second, session best and session taps.
 	/// </summary>
-	public class SpeedMeter : MonoBehaviour
+	public class SpeedMeter : MonoBehaviour, IMovableText
 	{
 		private const float RefreshInterval = 0.25f;
 		// Above the game's bar over the cat's head.
@@ -78,6 +78,28 @@ namespace SuperKRWKMod.Features
 		{
 			// The game may have paused rendering while in the background; show the new text.
 			OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(0.05f);
+		}
+
+		// --- IMovableText (layout editor) ---------------------------------------------------------
+
+		public RectTransform LayoutTarget => _box;
+		public Vector2 LayoutBase => BasePosition;
+		public string LayoutSection => "Meter";
+		public string LayoutKeyX => "OffsetX";
+		public string LayoutKeyY => "OffsetY";
+
+		public void SetEditing(bool editing)
+		{
+			if (editing)
+			{
+				_box.gameObject.SetActive(true);
+				_nextRefresh = 0f;
+				_lastText = null;
+			}
+			else
+			{
+				ApplyConfig();
+			}
 		}
 
 		private void OnDestroy()

@@ -9,7 +9,7 @@ namespace SuperKRWKMod.Features
 	/// "×128 COMBO" next to the cat while you keep typing without a pause. It pops on every tap,
 	/// changes colour at milestones, and lingers briefly after the combo ends.
 	/// </summary>
-	public class ComboDisplay : MonoBehaviour
+	public class ComboDisplay : MonoBehaviour, IMovableText
 	{
 		private static readonly Vector2 BasePosition = new Vector2(-62f, 82f);
 		private const float PopScale = 1.35f;
@@ -27,6 +27,7 @@ namespace SuperKRWKMod.Features
 		private float _popTime = -10f;
 		private float _endTime = -10f;
 		private float _hue;
+		private bool _editing;
 
 		public void Init(ModConfig config, TapTracker tracker, Transform parent, TMP_Text style)
 		{
@@ -50,7 +51,7 @@ namespace SuperKRWKMod.Features
 
 		private void Update()
 		{
-			if (_label == null)
+			if (_label == null || _editing)
 				return;
 
 			float now = Time.unscaledTime;
@@ -129,6 +130,32 @@ namespace SuperKRWKMod.Features
 			_shown = 0;
 			_endTime = -10f;
 			_render.SetFullRate(false);
+		}
+
+		// --- IMovableText (layout editor) ---------------------------------------------------------
+
+		public RectTransform LayoutTarget => _label.rectTransform;
+		public Vector2 LayoutBase => BasePosition;
+		public string LayoutSection => "Combo";
+		public string LayoutKeyX => "OffsetX";
+		public string LayoutKeyY => "OffsetY";
+
+		public void SetEditing(bool editing)
+		{
+			_editing = editing;
+			if (editing)
+			{
+				// A sample, since there is no combo while you're dragging things around.
+				_label.text = "<b>×123</b>\n<size=55%>COMBO</size>";
+				_label.rectTransform.localScale = Vector3.one;
+				_label.color = _baseColor;
+				_label.gameObject.SetActive(true);
+			}
+			else
+			{
+				Hide();
+				ApplyConfig();
+			}
 		}
 
 		private void OnDisable()

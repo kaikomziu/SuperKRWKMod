@@ -30,6 +30,7 @@ namespace SuperKRWKMod
 		private Records _records;
 		private AppRules _appRules;
 		private ChestNotice _chest;
+		private LayoutEditor _layout;
 
 		private void Awake()
 		{
@@ -98,6 +99,13 @@ namespace SuperKRWKMod
 			_combo.Init(_config, _tracker, ui, counterStyle);
 			_chest = gameObject.AddComponent<ChestNotice>();
 			_chest.Init(_config, mainCat, ui, counterStyle);
+
+			_layout = gameObject.AddComponent<LayoutEditor>();
+			_layout.Init(_config, ui, counterStyle, ApplyConfig);
+			_layout.Add(_meter);
+			_layout.Add(_chest);
+			_layout.Add(_combo);
+			_layout.Add(sleep);
 			_appRules.Changed += OnAppRulesChanged;
 
 			Log.InfoT(this, $"Features ready (tint targets: {tintTargets.Count}, counter style: {counterStyle != null}).");
@@ -129,6 +137,12 @@ namespace SuperKRWKMod
 				BuildExtra = page =>
 				{
 					page.Toggle(ConfigToggle(() => ModText.Get("Box behind meter and countdown", "メーターとカウントダウンに背景の枠"), "Text", "Background"));
+					page.Button(ModText.Get("Move the text (drag)", "文字の位置を変える（ドラッグ）"), () => _layout.Begin());
+					page.Button(ModText.Get("Reset text positions", "文字の位置をリセット"), () =>
+					{
+						_layout.ResetAll();
+						page.Refresh();
+					});
 					page.Button(ScaleButtonLabel(), () =>
 					{
 						Cycle("Scale", ScalePresets, _config.TextScale);

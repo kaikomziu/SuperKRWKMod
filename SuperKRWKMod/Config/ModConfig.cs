@@ -91,7 +91,11 @@ Outline=true
 ; Colour as #RRGGBB (or a name like white, black).
 OutlineColor=#FFFFFF
 ; Thickness 0..1.
-OutlineWidth=0.25
+OutlineWidth=0.35
+; Size multiplier for all of the mod's on-screen text.
+Scale=1.25
+; Box behind the speed meter and chest countdown.
+Background=true
 
 [AppRules]
 ; While one of these apps is running, the listed features are switched off; they come back when it closes.
@@ -174,7 +178,9 @@ ReloadKey=F9
 		public bool ChestShake => GetBool("Chest", "Shake", true);
 		public bool TextOutline => GetBool("Text", "Outline", true);
 		public string TextOutlineColorName => Get("Text", "OutlineColor") ?? "#FFFFFF";
-		public float TextOutlineWidth => Mathf.Clamp01(GetFloat("Text", "OutlineWidth", 0.25f));
+		public float TextOutlineWidth => Mathf.Clamp01(GetFloat("Text", "OutlineWidth", 0.35f));
+		public float TextScale => Mathf.Clamp(GetFloat("Text", "Scale", 1.25f), 0.5f, 3f);
+		public bool TextBackground => GetBool("Text", "Background", true);
 
 		public Color TextOutlineColor
 		{

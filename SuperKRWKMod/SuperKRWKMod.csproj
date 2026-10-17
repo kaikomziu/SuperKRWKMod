@@ -119,7 +119,7 @@
     <Compile Include="Features\Zoomies.cs" />
     <Compile Include="Utilities\RenderDemand.cs" />
     <Compile Include="Utilities\UiUtil.cs" />
-    <Compile Include="Utilities\TextOutline.cs" />
+    <Compile Include="Utilities\TextStyle.cs" />
     <Compile Include="Utilities\MathUtil.cs" />
     <Compile Include="ModList\ModRegistry.cs" />
     <Compile Include="ModList\CustomSettingsPage.cs" />

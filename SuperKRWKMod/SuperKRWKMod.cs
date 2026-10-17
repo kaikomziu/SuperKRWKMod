@@ -69,7 +69,8 @@ namespace SuperKRWKMod
 					tintTargets.Add(graphic);
 			}
 
-			ApplyTextOutline();
+			TextStyle.BoxTemplate = mainCat.Find("DraggableFrame/UI/Counter_Frame")?.GetComponent<Image>();
+			ApplyTextStyle();
 
 			_tracker = gameObject.AddComponent<TapTracker>();
 			_tracker.WindowSeconds = _config.WindowSeconds;
@@ -127,6 +128,17 @@ namespace SuperKRWKMod
 					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
 				BuildExtra = page =>
 				{
+					page.Toggle(ConfigToggle(() => ModText.Get("Box behind meter and countdown", "メーターとカウントダウンに背景の枠"), "Text", "Background"));
+					page.Button(ScaleButtonLabel(), () =>
+					{
+						Cycle("Scale", ScalePresets, _config.TextScale);
+						page.Refresh();
+					});
+					page.Button(WidthButtonLabel(), () =>
+					{
+						Cycle("OutlineWidth", WidthPresets, _config.TextOutlineWidth);
+						page.Refresh();
+					});
 					page.Button(OutlineButtonLabel(), () =>
 					{
 						NextOutlinePreset();
@@ -171,12 +183,12 @@ namespace SuperKRWKMod
 			_meter.ApplyConfig();
 			_combo.ApplyConfig();
 			_chest.ApplyConfig();
-			ApplyTextOutline();
+			ApplyTextStyle();
 		}
 
-		private void ApplyTextOutline()
+		private void ApplyTextStyle()
 		{
-			TextOutline.Configure(_config.TextOutline, _config.TextOutlineColor, _config.TextOutlineWidth);
+			TextStyle.Configure(_config.TextOutline, _config.TextOutlineColor, _config.TextOutlineWidth, _config.TextScale, _config.TextBackground);
 		}
 
 		// Outline colour choices offered on the Mods page (null colour = no outline).
@@ -207,6 +219,39 @@ namespace SuperKRWKMod
 			return ModText.Get($"Text outline: {name}", $"文字の縁取り: {name}");
 		}
 
+		private static readonly float[] ScalePresets = { 1f, 1.25f, 1.5f, 1.75f };
+		private static readonly string[][] ScaleNames = { new[] { "Small", "小" }, new[] { "Medium", "中" }, new[] { "Large", "大" }, new[] { "Extra large", "特大" } };
+		private static readonly float[] WidthPresets = { 0.2f, 0.35f, 0.5f };
+		private static readonly string[][] WidthNames = { new[] { "Thin", "細" }, new[] { "Medium", "中" }, new[] { "Thick", "太" } };
+
+		private static int Nearest(float[] presets, float value)
+		{
+			int best = 0;
+			for (int i = 1; i < presets.Length; i++)
+				if (Mathf.Abs(presets[i] - value) < Mathf.Abs(presets[best] - value))
+					best = i;
+			return best;
+		}
+
+		private string ScaleButtonLabel()
+		{
+			var name = ScaleNames[Nearest(ScalePresets, _config.TextScale)];
+			return ModText.Get($"Text size: {name[0]}", $"文字の大きさ: {name[1]}");
+		}
+
+		private string WidthButtonLabel()
+		{
+			var name = WidthNames[Nearest(WidthPresets, _config.TextOutlineWidth)];
+			return ModText.Get($"Outline thickness: {name[0]}", $"縁取りの太さ: {name[1]}");
+		}
+
+		private void Cycle(string key, float[] presets, float current)
+		{
+			var next = presets[(Nearest(presets, current) + 1) % presets.Length];
+			_config.Set("Text", key, next.ToString(System.Globalization.CultureInfo.InvariantCulture));
+			ApplyTextStyle();
+		}
+
 		private void NextOutlinePreset()
 		{
 			var next = OutlinePresets[(CurrentOutlinePreset() + 1) % OutlinePresets.Length];
@@ -219,7 +264,7 @@ namespace SuperKRWKMod
 				_config.Set("Text", "Outline", "true");
 				_config.Set("Text", "OutlineColor", next[0]);
 			}
-			ApplyTextOutline();
+			ApplyTextStyle();
 		}
 
 		private void OnAppRulesChanged()

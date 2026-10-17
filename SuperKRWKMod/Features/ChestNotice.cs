@@ -17,8 +17,8 @@ namespace SuperKRWKMod.Features
 	/// </summary>
 	public class ChestNotice : MonoBehaviour
 	{
-		// Left of the combo counter (see ComboDisplay).
-		private static readonly Vector2 CountdownPosition = new Vector2(-155f, 82f);
+		// Right edge just left of the combo counter (see ComboDisplay); the box grows leftwards.
+		private static readonly Vector2 CountdownPosition = new Vector2(-112f, 82f);
 		// Used only when the game's chat bubble can't be found.
 		private static readonly Vector2 FallbackPosition = new Vector2(0f, 142f);
 		private const float CheckSeconds = 0.5f;
@@ -39,6 +39,7 @@ namespace SuperKRWKMod.Features
 		private CanvasGroup _bubbleGroup;
 		private Vector2 _bubbleBase;
 		private TextMeshProUGUI _countdown;
+		private RectTransform _countdownBox;
 		private string _countdownText;
 		private readonly RenderDemand _render = new RenderDemand();
 		private Watched _normal;
@@ -81,16 +82,17 @@ namespace SuperKRWKMod.Features
 			_bubbleBase = _bubble.anchoredPosition;
 			_bubble.gameObject.SetActive(false);
 
-			_countdown = UiUtil.CreateLabel("SuperKRWKChestCountdown", fallbackParent, style, 9f, CountdownPosition, new Vector2(120f, 30f));
+			_countdown = UiUtil.CreateBoxedLabel("SuperKRWKChestCountdown", fallbackParent, style, 9f, CountdownPosition, new Vector2(1f, 0.5f));
 			_countdown.alignment = TextAlignmentOptions.Right;
-			_countdown.gameObject.SetActive(false);
+			_countdownBox = UiUtil.BoxOf(_countdown);
+			_countdownBox.gameObject.SetActive(false);
 			ApplyConfig();
 		}
 
 		public void ApplyConfig()
 		{
 			if (_countdown != null)
-				_countdown.rectTransform.anchoredPosition = CountdownPosition + new Vector2(_config.CountdownOffsetX, _config.CountdownOffsetY);
+				_countdownBox.anchoredPosition = CountdownPosition + new Vector2(_config.CountdownOffsetX, _config.CountdownOffsetY);
 			_countdownText = null;
 		}
 
@@ -120,9 +122,9 @@ namespace SuperKRWKMod.Features
 			bool show = _config.ChestEnabled && _config.ChestCountdown && (Shop.NormalShop != null || Shop.EmoteShop != null);
 			if (!show)
 			{
-				if (_countdown.gameObject.activeSelf)
+				if (_countdownBox.gameObject.activeSelf)
 				{
-					_countdown.gameObject.SetActive(false);
+					_countdownBox.gameObject.SetActive(false);
 					OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(0.05f);
 				}
 				_countdownText = null;
@@ -138,7 +140,7 @@ namespace SuperKRWKMod.Features
 
 			_countdownText = text;
 			_countdown.text = text;
-			_countdown.gameObject.SetActive(true);
+			_countdownBox.gameObject.SetActive(true);
 			// The game may have paused rendering in the background; show the new time.
 			OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(0.05f);
 		}
@@ -292,8 +294,8 @@ namespace SuperKRWKMod.Features
 
 		private void OnDestroy()
 		{
-			if (_countdown != null)
-				Destroy(_countdown.gameObject);
+			if (_countdownBox != null)
+				Destroy(_countdownBox.gameObject);
 			if (_bubble != null)
 				Destroy(_bubble.gameObject);
 		}

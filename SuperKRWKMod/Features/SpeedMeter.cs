@@ -13,11 +13,13 @@ namespace SuperKRWKMod.Features
 	public class SpeedMeter : MonoBehaviour
 	{
 		private const float RefreshInterval = 0.25f;
-		private static readonly Vector2 BasePosition = new Vector2(0f, 112f);
+		// Above the game's bar over the cat's head.
+		private static readonly Vector2 BasePosition = new Vector2(0f, 138f);
 
 		private ModConfig _config;
 		private TapTracker _tracker;
 		private TextMeshProUGUI _label;
+		private RectTransform _box;
 		private float _nextRefresh;
 		private string _lastText;
 
@@ -25,7 +27,8 @@ namespace SuperKRWKMod.Features
 		{
 			_config = config;
 			_tracker = tracker;
-			_label = UiUtil.CreateLabel("SuperKRWKSpeedMeter", parent, style, config.MeterFontSize, BasePosition, new Vector2(220f, 40f));
+			_label = UiUtil.CreateBoxedLabel("SuperKRWKSpeedMeter", parent, style, config.MeterFontSize, BasePosition, new Vector2(0.5f, 0.5f));
+			_box = UiUtil.BoxOf(_label);
 			ApplyConfig();
 		}
 
@@ -34,9 +37,9 @@ namespace SuperKRWKMod.Features
 			if (_label == null)
 				return;
 
-			_label.fontSize = _config.MeterFontSize;
-			_label.rectTransform.anchoredPosition = BasePosition + new Vector2(_config.MeterOffsetX, _config.MeterOffsetY);
-			_label.gameObject.SetActive(_config.MeterEnabled && _config.MeterVisible);
+			TextStyle.SetBaseSize(_label, _config.MeterFontSize);
+			_box.anchoredPosition = BasePosition + new Vector2(_config.MeterOffsetX, _config.MeterOffsetY);
+			_box.gameObject.SetActive(_config.MeterEnabled && _config.MeterVisible);
 			_lastText = null;
 			RequestFrame();
 		}
@@ -48,13 +51,13 @@ namespace SuperKRWKMod.Features
 
 			if (Input.GetKeyDown(_config.MeterToggleKey))
 			{
-				bool visible = !_label.gameObject.activeSelf;
+				bool visible = !_box.gameObject.activeSelf;
 				_config.Set("Meter", "Visible", visible ? "true" : "false");
-				_label.gameObject.SetActive(visible);
+				_box.gameObject.SetActive(visible);
 				RequestFrame();
 			}
 
-			if (!_label.gameObject.activeSelf || Time.unscaledTime < _nextRefresh)
+			if (!_box.gameObject.activeSelf || Time.unscaledTime < _nextRefresh)
 				return;
 
 			_nextRefresh = Time.unscaledTime + RefreshInterval;
@@ -80,7 +83,7 @@ namespace SuperKRWKMod.Features
 		private void OnDestroy()
 		{
 			if (_label != null)
-				Destroy(_label.gameObject);
+				Destroy(_box.gameObject);
 		}
 	}
 }

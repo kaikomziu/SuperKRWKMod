@@ -28,6 +28,7 @@ namespace SuperKRWKMod.ModList
 		private Transform _content;
 		private GameObject _page;
 		private Button _button;
+		private TMP_Text _buttonLabel;
 		private ScrollRect _scroll;
 
 		// Templates (never modified).
@@ -63,6 +64,7 @@ namespace SuperKRWKMod.ModList
 			HookGameTabs(tabButtons);
 			Rebuild();
 			ModRegistry.Changed += Rebuild;
+			ModText.LanguageChanged += OnLanguageChanged;
 
 			Log.InfoT(this, "Mods settings page added.");
 			return true;
@@ -71,6 +73,7 @@ namespace SuperKRWKMod.ModList
 		private void OnDestroy()
 		{
 			ModRegistry.Changed -= Rebuild;
+			ModText.LanguageChanged -= OnLanguageChanged;
 		}
 
 		private void CreateButton(Transform template, Transform parent)
@@ -85,7 +88,8 @@ namespace SuperKRWKMod.ModList
 			_button.interactable = true;
 
 			var label = go.GetComponentInChildren<TMP_Text>(true);
-			SetStaticText(label, "Mods");
+			_buttonLabel = label;
+			SetStaticText(label, ModText.Get("Mods", "MOD"));
 		}
 
 		private void CreatePage(Transform template)
@@ -158,6 +162,12 @@ namespace SuperKRWKMod.ModList
 				_scroll.verticalNormalizedPosition = 1f;
 		}
 
+		private void OnLanguageChanged()
+		{
+			SetStaticText(_buttonLabel, ModText.Get("Mods", "MOD"));
+			Rebuild();
+		}
+
 		private void Rebuild()
 		{
 			if (_page == null)
@@ -169,27 +179,32 @@ namespace SuperKRWKMod.ModList
 
 			var header = Clone(_headerTemplate);
 			// Keep "Settings" localized; replace the category name.
-			SetStaticText(header.Find("CategoryTxt")?.GetComponent<TMP_Text>(), "Mods");
+			SetStaticText(header.Find("CategoryTxt")?.GetComponent<TMP_Text>(), ModText.Get("Mods", "MOD"));
 
-			AddText($"{ModRegistry.Mods.Count} mod(s) installed", 0.8f);
+			int count = ModRegistry.Mods.Count;
+			AddText(ModText.Get($"{count} mod(s) installed", $"{count}個のMODが導入されています"), 0.8f);
 
 			foreach (var mod in ModRegistry.Mods)
 			{
 				Clone(_dividerTemplate);
 				AddText($"<b>{mod.Name}</b> <size=80%>v{mod.Version}</size>", 1.1f);
-				if (!string.IsNullOrEmpty(mod.Author))
-					AddText($"by {mod.Author}", 0.75f);
-				if (!string.IsNullOrEmpty(mod.Description))
-					AddText(mod.Description, 0.8f);
+				AddOptionalText(mod.Author, 0.75f);
+				AddOptionalText(mod.Description, 0.8f);
 
 				foreach (var toggle in mod.Toggles)
 					AddToggle(toggle);
 
-				if (!string.IsNullOrEmpty(mod.Hotkeys))
-					AddText(mod.Hotkeys, 0.75f);
+				AddOptionalText(mod.Hotkeys, 0.75f);
 			}
 
 			RefreshToggles();
+		}
+
+		private void AddOptionalText(System.Func<string> text, float scale)
+		{
+			var value = text?.Invoke();
+			if (!string.IsNullOrEmpty(value))
+				AddText(value, scale);
 		}
 
 		private void AddText(string text, float scale)
@@ -227,7 +242,7 @@ namespace SuperKRWKMod.ModList
 					Destroy(behaviour);
 			}
 
-			SetStaticText(row.Find("Content/Label")?.GetComponent<TMP_Text>(), toggle.Label);
+			SetStaticText(row.Find("Content/Label")?.GetComponent<TMP_Text>(), toggle.Label?.Invoke());
 
 			var box = row.Find("Content/Toggle");
 			var check = box != null && box.childCount > 0 ? box.GetChild(0).gameObject : null;

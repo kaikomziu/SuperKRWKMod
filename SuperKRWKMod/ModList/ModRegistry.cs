@@ -3,10 +3,12 @@ using System.Collections.Generic;
 
 namespace SuperKRWKMod.ModList
 {
+	// Text fields are functions so they can follow the game's language (see ModText).
+
 	/// <summary>An on/off switch a mod exposes in the in-game Mods settings page.</summary>
 	public class ModToggle
 	{
-		public string Label;
+		public Func<string> Label;
 		public Func<bool> Get;
 		public Action<bool> Set;
 	}
@@ -15,9 +17,9 @@ namespace SuperKRWKMod.ModList
 	{
 		public string Name;
 		public string Version;
-		public string Author;
-		public string Description;
-		public string Hotkeys;
+		public Func<string> Author;
+		public Func<string> Description;
+		public Func<string> Hotkeys;
 		public readonly List<ModToggle> Toggles = new List<ModToggle>();
 	}
 

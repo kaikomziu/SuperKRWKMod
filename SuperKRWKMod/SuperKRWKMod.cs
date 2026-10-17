@@ -3,6 +3,7 @@ using SuperKRWKMod.Config;
 using SuperKRWKMod.Debug;
 using SuperKRWKMod.Features;
 using SuperKRWKMod.ModList;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using TMPro;
@@ -95,23 +96,25 @@ namespace SuperKRWKMod
 			{
 				Name = "SuperKRWKMod",
 				Version = Version,
-				Author = "KRWK (based on Catnip Mod by Shilo)",
-				Description = "Visual-only fun. Never changes taps, stats or items.",
-				Hotkeys = $"{_config.MeterToggleKey}: show/hide meter   {_config.ReloadKey}: reload superkrwk.ini",
+				Author = () => ModText.Get("by KRWK (based on Catnip Mod by Shilo)", "作者: KRWK（ShiloさんのCatnip Modがベース）"),
+				Description = () => ModText.Get("Visual-only fun. Never changes taps, stats or items.", "見た目だけの改造です。タップ数・統計・アイテムは一切変更しません。"),
+				Hotkeys = () => ModText.Get(
+					$"{_config.MeterToggleKey}: show/hide meter   {_config.ReloadKey}: reload superkrwk.ini",
+					$"{_config.MeterToggleKey}: メーター表示切替   {_config.ReloadKey}: superkrwk.ini 再読込"),
 			};
-			info.Toggles.Add(ConfigToggle("Zoomies (hop & rainbow)", "Zoomies"));
-			info.Toggles.Add(ConfigToggle("Typing speed meter", "Meter"));
-			info.Toggles.Add(ConfigToggle("Sleep mode (Zzz)", "Sleep"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Zoomies (hop & rainbow)", "ズーミー（ジャンプ＆虹色）"), "Zoomies"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Typing speed meter", "打鍵速度メーター"), "Meter"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Sleep mode (Zzz)", "おやすみモード（Zzz）"), "Sleep"));
 			info.Toggles.Add(new ModToggle
 			{
-				Label = "Close eyes while asleep",
+				Label = () => ModText.Get("Close eyes while asleep", "寝ているときに目を閉じる"),
 				Get = () => _config.SleepCloseEyes,
 				Set = value => _config.Set("Sleep", "CloseEyes", value ? "true" : "false"),
 			});
 			ModRegistry.Register(info);
 		}
 
-		private ModToggle ConfigToggle(string label, string section)
+		private ModToggle ConfigToggle(Func<string> label, string section)
 		{
 			return new ModToggle
 			{

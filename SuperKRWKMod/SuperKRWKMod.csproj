@@ -122,6 +122,7 @@
     <Compile Include="Utilities\MathUtil.cs" />
     <Compile Include="ModList\ModRegistry.cs" />
     <Compile Include="ModList\ModsSettingsPage.cs" />
+    <Compile Include="ModList\ModText.cs" />
     <Compile Include="Utilities\SpriteRasterizer.cs" />
     <Compile Include="Utilities\EyeCloser.cs" />
     <Compile Include="Features\SleepyEyes.cs" />

@@ -21,8 +21,21 @@ namespace SuperKRWKMod.ModList
 		void Button(string label, Action onClick);
 		void Divider();
 
+		/// <summary>A horizontal bar chart, one row per item (bars scaled to the largest value).</summary>
+		void BarChart(IList<BarItem> items);
+
+		/// <summary>A "− label +" row for adjusting a number; the label is re-read after each click.</summary>
+		void Stepper(Func<string> label, Action decrease, Action increase);
+
 		/// <summary>Rebuilds the page (call after changing what should be shown).</summary>
 		void Refresh();
+	}
+
+	public struct BarItem
+	{
+		public string Label;
+		public float Value;
+		public string ValueText;
 	}
 
 	public class ModInfo

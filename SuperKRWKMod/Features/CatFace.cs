@@ -17,6 +17,10 @@ namespace SuperKRWKMod.Features
 	public class CatFace : MonoBehaviour
 	{
 		private const int Closed = -1;
+		private const int Happy = -2;
+		private const float BlinkSeconds = 0.12f;
+		private const float HappySeconds = 1.6f;
+		private const int ComboMilestone = 100;
 		private const int Center = 8;
 		// Sector hysteresis so the eyes don't flicker on a direction boundary (degrees).
 		private const float Hysteresis = 8f;
@@ -34,13 +38,69 @@ namespace SuperKRWKMod.Features
 		private readonly Dictionary<Sprite, Variants> _bySource = new Dictionary<Sprite, Variants>();
 		private readonly Dictionary<Sprite, Sprite> _sourceOf = new Dictionary<Sprite, Sprite>();
 		private int _sector = Center;
+		private TapTracker _tracker;
+		private Transform _visuals;
+		private float _nextBlink;
+		private float _blinkUntil = -1f;
+		private bool _doubleBlink;
+		private float _happyUntil = -1f;
+		private int _lastComboMilestone;
 
-		public void Init(ModConfig config, SleepMode sleep, Image body)
+		public void Init(ModConfig config, SleepMode sleep, Image body, TapTracker tracker, Transform visuals)
 		{
 			_config = config;
 			_sleep = sleep;
 			_body = body;
 			_bodyRect = body.rectTransform;
+			_tracker = tracker;
+			_visuals = visuals;
+			ScheduleBlink();
+		}
+
+		/// <summary>Shows happy "^ ^" eyes for a moment.</summary>
+		public void ShowHappy(float seconds = HappySeconds)
+		{
+			if (_config.EyesHappy)
+				_happyUntil = Mathf.Max(_happyUntil, Time.unscaledTime + seconds);
+		}
+
+		private void ScheduleBlink()
+		{
+			_nextBlink = Time.unscaledTime + UnityEngine.Random.Range(2.5f, 6f);
+		}
+
+		/// <summary>Patting (yours or a friend's) squishes the cat's visuals unevenly; that's the cue.</summary>
+		private bool IsBeingPatted()
+		{
+			if (_visuals == null)
+				return false;
+			var scale = _visuals.localScale;
+			return Mathf.Abs(scale.y) > 0.0001f && Mathf.Abs(Mathf.Abs(scale.x / scale.y) - 1f) > 0.05f;
+		}
+
+		private void UpdateExpressions()
+		{
+			float now = Time.unscaledTime;
+
+			if (IsBeingPatted())
+				ShowHappy();
+
+			int milestone = _tracker != null ? _tracker.Combo / ComboMilestone : 0;
+			if (milestone > _lastComboMilestone)
+				ShowHappy();
+			_lastComboMilestone = milestone;
+
+			if (now >= _nextBlink)
+			{
+				if (_config.EyesBlink)
+					_blinkUntil = now + BlinkSeconds;
+				// Sometimes a quick double blink.
+				_doubleBlink = !_doubleBlink && UnityEngine.Random.Range(0f, 1f) < 0.25f;
+				if (_doubleBlink)
+					_nextBlink = now + BlinkSeconds * 2.5f;
+				else
+					ScheduleBlink();
+			}
 		}
 
 		private void LateUpdate()
@@ -51,8 +111,16 @@ namespace SuperKRWKMod.Features
 			var current = _body.sprite;
 			var source = _sourceOf.TryGetValue(current, out var s) ? s : current;
 
+			UpdateExpressions();
+			float now = Time.unscaledTime;
+
+			// Asleep > happy > blink > looking at the cursor.
 			int wanted = Center;
 			if (_sleep.IsAsleep && _config.SleepCloseEyes)
+				wanted = Closed;
+			else if (now < _happyUntil)
+				wanted = Happy;
+			else if (now < _blinkUntil)
 				wanted = Closed;
 			else if (_config.EyesFollowCursor)
 				wanted = LookSector();
@@ -126,7 +194,9 @@ namespace SuperKRWKMod.Features
 
 			if (!variants.Sprites.TryGetValue(key, out var sprite))
 			{
-				sprite = key == Closed ? variants.Eyes.MakeClosed() : MakeLooking(variants.Eyes, key);
+				sprite = key == Closed ? variants.Eyes.MakeClosed()
+					: key == Happy ? variants.Eyes.MakeHappy()
+					: MakeLooking(variants.Eyes, key);
 				variants.Sprites[key] = sprite;
 				_sourceOf[sprite] = source;
 			}

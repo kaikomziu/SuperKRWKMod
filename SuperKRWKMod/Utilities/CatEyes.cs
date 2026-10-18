@@ -64,8 +64,17 @@ namespace SuperKRWKMod.Utilities
 		{
 			var pixels = (Color[])_blank.Clone();
 			foreach (var eye in _eyes)
-				DrawClosed(pixels, eye);
+				DrawArc(pixels, eye, happy: false);
 			return ToSprite(pixels, "_Closed");
+		}
+
+		/// <summary>Happy "^ ^" eyes: the closed curve flipped upwards.</summary>
+		public Sprite MakeHappy()
+		{
+			var pixels = (Color[])_blank.Clone();
+			foreach (var eye in _eyes)
+				DrawArc(pixels, eye, happy: true);
+			return ToSprite(pixels, "_Happy");
 		}
 
 		/// <summary>Pupils moved by (dx, dy) sprite pixels; +y is up.</summary>
@@ -286,9 +295,9 @@ namespace SuperKRWKMod.Utilities
 			}
 		}
 
-		private void DrawClosed(Color[] pixels, Eye eye)
+		private void DrawArc(Color[] pixels, Eye eye, bool happy)
 		{
-			// A soft downward curve, a little wider than the open eye.
+			// A soft downward curve (closed) or upward arch (happy), a little wider than the open eye.
 			float halfWidth = eye.Rx * 1.25f;
 			float sag = eye.Ry * 0.55f;
 			float thickness = Mathf.Max(1.6f, eye.Ry * 0.5f);
@@ -297,7 +306,10 @@ namespace SuperKRWKMod.Utilities
 			for (int s = 0; s <= samples; s++)
 			{
 				float t = s * 2f / samples - 1f;
-				curve[s] = new Vector2(eye.Cx + halfWidth * t, eye.Cy + sag * 0.35f - sag * (1f - t * t));
+				float bend = sag * (1f - t * t);
+				curve[s] = happy
+					? new Vector2(eye.Cx + halfWidth * t, eye.Cy - sag * 0.35f + bend)
+					: new Vector2(eye.Cx + halfWidth * t, eye.Cy + sag * 0.35f - bend);
 			}
 
 			int x0 = Mathf.Max(0, (int)(eye.Cx - halfWidth - thickness - 2f));

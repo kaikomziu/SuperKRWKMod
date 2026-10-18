@@ -61,6 +61,10 @@ NightIdleSeconds=20
 FollowCursor=true
 ; How far the pupils move, in sprite pixels (1-6).
 MaxShift=3
+; Blink every few seconds.
+Blink=true
+; Happy ^ ^ eyes when patted and at every 100 combo.
+Happy=true
 
 [Combo]
 ; Shows x128 COMBO while you keep typing without pausing longer than TimeoutSeconds.
@@ -96,6 +100,17 @@ OutlineWidth=0.35
 Scale=1.25
 ; Box behind the speed meter and chest countdown.
 Background=true
+
+[Break]
+; Suggest a break after typing this many minutes without a real pause (taps keep counting).
+Enabled=true
+Minutes=50
+; No input for this long counts as a break.
+ResetMinutes=5
+
+[Greeting]
+; Say hello for the time of day at start, and once a night suggest bed when it gets late.
+Enabled=true
 
 [AppRules]
 ; While one of these apps is running, the listed features are switched off; they come back when it closes.
@@ -169,6 +184,8 @@ Language=auto
 		public float NightIdleSeconds => Mathf.Max(5f, GetFloat("Sleep", "NightIdleSeconds", 20f));
 
 		public bool EyesFollowCursor => GetBool("Eyes", "FollowCursor", true) && !IsSuppressed(FeatureEyes);
+		public bool EyesBlink => GetBool("Eyes", "Blink", true) && !IsSuppressed(FeatureEyes);
+		public bool EyesHappy => GetBool("Eyes", "Happy", true) && !IsSuppressed(FeatureEyes);
 		public int EyesMaxShift => (int)GetFloat("Eyes", "MaxShift", 3f);
 
 		public bool ComboEnabled => GetBool("Combo", "Enabled", true) && !IsSuppressed(FeatureCombo);
@@ -196,6 +213,11 @@ Language=auto
 				return ColorUtility.TryParseHtmlString(name, out var color) ? color : Color.white;
 			}
 		}
+
+		public bool BreakEnabled => GetBool("Break", "Enabled", true);
+		public float BreakMinutes => Mathf.Clamp(GetFloat("Break", "Minutes", 50f), 5f, 600f);
+		public float BreakResetMinutes => Mathf.Clamp(GetFloat("Break", "ResetMinutes", 5f), 1f, 120f);
+		public bool GreetingEnabled => GetBool("Greeting", "Enabled", true);
 
 		public bool ChestCountdown => GetBool("Chest", "Countdown", true);
 		public float CountdownOffsetX => GetFloat("Chest", "CountdownOffsetX", 0f);

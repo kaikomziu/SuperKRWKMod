@@ -7,7 +7,6 @@ using System.Globalization;
 using System.Text;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Localization.Components;
 
 namespace SuperKRWKMod.Features
 {
@@ -20,11 +19,7 @@ namespace SuperKRWKMod.Features
 	{
 		// Right edge just left of the combo counter (see ComboDisplay); the box grows leftwards.
 		private static readonly Vector2 CountdownPosition = new Vector2(-112f, 82f);
-		// Used only when the game's chat bubble can't be found.
-		private static readonly Vector2 FallbackPosition = new Vector2(0f, 142f);
 		private const float CheckSeconds = 0.5f;
-		private const float BubbleSeconds = 5f;
-		private const float FadeSeconds = 0.6f;
 
 		private class Watched
 		{
@@ -35,10 +30,7 @@ namespace SuperKRWKMod.Features
 		}
 
 		private ModConfig _config;
-		private RectTransform _bubble;
-		private TMP_Text _bubbleText;
-		private CanvasGroup _bubbleGroup;
-		private Vector2 _bubbleBase;
+		private CatBubble _bubble;
 		private TextMeshProUGUI _countdown;
 		private RectTransform _countdownBox;
 		private string _countdownText;
@@ -47,42 +39,11 @@ namespace SuperKRWKMod.Features
 		private Watched _normal;
 		private Watched _emote;
 		private float _nextCheck;
-		private float _bubbleTime = -100f;
 
-		public void Init(ModConfig config, Transform mainCat, Transform fallbackParent, TMP_Text style)
+		public void Init(ModConfig config, CatBubble bubble, Transform fallbackParent, TMP_Text style)
 		{
 			_config = config;
-
-			// A copy of the game's chat speech bubble, so it looks like the cat is talking. Only the
-			// visuals are copied: the game's chat logic (which can send to multiplayer) isn't involved.
-			var template = mainCat.Find("Chat/SpeechBubble");
-			if (template != null)
-			{
-				var copy = Instantiate(template.gameObject, template.parent, false);
-				copy.name = "SuperKRWKChestBubble";
-				_bubble = (RectTransform)copy.transform;
-				_bubbleText = copy.GetComponentInChildren<TMP_Text>(true);
-				var localize = _bubbleText != null ? _bubbleText.GetComponent<LocalizeStringEvent>() : null;
-				if (localize != null)
-					Destroy(localize);
-			}
-			else
-			{
-				Log.WarnT(this, "Game speech bubble not found; using plain text.");
-				var label = UiUtil.CreateLabel("SuperKRWKChestBubble", fallbackParent, style, 12f, FallbackPosition, new Vector2(240f, 30f));
-				label.color = new Color(1f, 0.55f, 0.15f);
-				_bubble = label.rectTransform;
-				_bubbleText = label;
-			}
-
-			_bubbleGroup = _bubble.gameObject.GetComponent<CanvasGroup>();
-			if (_bubbleGroup == null)
-				_bubbleGroup = _bubble.gameObject.AddComponent<CanvasGroup>();
-			// Never catch the mouse (CanvasGroup.blocksRaycasts is stripped, so per graphic).
-			foreach (var graphic in _bubble.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
-				graphic.raycastTarget = false;
-			_bubbleBase = _bubble.anchoredPosition;
-			_bubble.gameObject.SetActive(false);
+			_bubble = bubble;
 
 			_countdown = UiUtil.CreateBoxedLabel("SuperKRWKChestCountdown", fallbackParent, style, 9f, CountdownPosition, new Vector2(1f, 0.5f));
 			_countdown.alignment = TextAlignmentOptions.Right;
@@ -100,8 +61,6 @@ namespace SuperKRWKMod.Features
 
 		private void Update()
 		{
-			AnimateBubble();
-
 			if (Time.unscaledTime < _nextCheck)
 				return;
 			_nextCheck = Time.unscaledTime + CheckSeconds;
@@ -189,14 +148,11 @@ namespace SuperKRWKMod.Features
 
 			if (_config.ChestBubble)
 			{
-				_bubbleText.text = normal != null && emote != null
+				_bubble.Say(normal != null && emote != null
 					? ModText.Get("Chest and emote chest ready!", "宝箱とエモート宝箱が買えるよ！")
 					: emote != null
 						? ModText.Get("Emote chest ready!", "エモート宝箱が買えるよ！")
-						: ModText.Get("Chest ready!", "宝箱が買えるよ！");
-				_bubbleTime = Time.unscaledTime;
-				_bubble.gameObject.SetActive(true);
-				_render.SetFullRate(true);
+						: ModText.Get("Chest ready!", "宝箱が買えるよ！"));
 			}
 
 			if (_config.ChestShake)
@@ -218,27 +174,6 @@ namespace SuperKRWKMod.Features
 				shake.Shake();
 				OnDemandRenderHelper.Instance?.ResumeRenderingForDuration(1.5f);
 			}
-		}
-
-		private void AnimateBubble()
-		{
-			if (!_bubble.gameObject.activeSelf)
-				return;
-
-			float t = Time.unscaledTime - _bubbleTime;
-			if (t >= BubbleSeconds || !_config.ChestEnabled)
-			{
-				_bubble.gameObject.SetActive(false);
-				_render.SetFullRate(false);
-				return;
-			}
-
-			// Pop in, bob gently, fade out at the end.
-			float pop = Mathf.Clamp01(t / 0.2f);
-			float scale = Mathf.Lerp(1.4f, 1f, pop * (2f - pop));
-			_bubble.localScale = new Vector3(scale, scale, 1f);
-			_bubble.anchoredPosition = _bubbleBase + new Vector2(0f, Mathf.Sin(t * 4f) * 2f);
-			_bubbleGroup.alpha = 1f - Mathf.Clamp01((t - (BubbleSeconds - FadeSeconds)) / FadeSeconds);
 		}
 
 		private static void AppendStatus(StringBuilder sb, Shop shop, string name)
@@ -321,8 +256,6 @@ namespace SuperKRWKMod.Features
 		{
 			if (_countdownBox != null)
 				Destroy(_countdownBox.gameObject);
-			if (_bubble != null)
-				Destroy(_bubble.gameObject);
 		}
 	}
 }

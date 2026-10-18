@@ -128,7 +128,11 @@ namespace SuperKRWKMod.ModList
 			layout.childControlWidth = templateLayout.childControlWidth;
 			layout.childControlHeight = templateLayout.childControlHeight;
 			layout.childForceExpandWidth = templateLayout.childForceExpandWidth;
-			layout.childForceExpandHeight = templateLayout.childForceExpandHeight;
+			// Rows keep their own height; the page grows or shrinks to fit them instead of spreading
+			// short content over the template's fixed height.
+			layout.childForceExpandHeight = false;
+			var fitter = _page.AddComponent<ContentSizeFitter>();
+			fitter.verticalFit = ContentSizeFitter.FitMode.PreferredSize;
 
 			_page.SetActive(false);
 		}
@@ -241,6 +245,112 @@ namespace SuperKRWKMod.ModList
 			button.interactable = true;
 			DestroyChild(row, "HoverTooltip");
 			SetStaticText(row.GetComponentInChildren<TMP_Text>(true), label);
+		}
+
+		void IModPageBuilder.BarChart(IList<BarItem> items)
+		{
+			const float labelWidth = 34f, valueWidth = 70f, maxBar = 100f, rowHeight = 14f;
+			float max = 0f;
+			foreach (var item in items)
+				max = Mathf.Max(max, item.Value);
+
+			foreach (var item in items)
+			{
+				var row = NewRow("SuperKRWKBarRow", rowHeight);
+
+				var label = SmallText(row, item.Label, labelWidth, TextAlignmentOptions.Left);
+				var bar = new GameObject("Bar");
+				bar.layer = row.gameObject.layer;
+				var barRect = bar.AddComponent<RectTransform>();
+				barRect.SetParent(row, false);
+				var image = bar.AddComponent<Image>();
+				image.raycastTarget = false;
+				var color = label.color;
+				color.a = 0.75f;
+				image.color = color;
+				var barLayout = bar.AddComponent<LayoutElement>();
+				// A sliver even for 0 so the row still reads as a bar chart.
+				barLayout.preferredWidth = max > 0f ? Mathf.Max(2f, maxBar * item.Value / max) : 2f;
+				barLayout.preferredHeight = rowHeight * 0.6f;
+
+				SmallText(row, item.ValueText, valueWidth, TextAlignmentOptions.Left);
+			}
+		}
+
+		void IModPageBuilder.Stepper(System.Func<string> label, System.Action decrease, System.Action increase)
+		{
+			var row = NewRow("SuperKRWKStepper", 24f);
+			TMP_Text text = null;
+			StepButton(row, "−", () => { decrease(); text.text = label(); });
+			text = SmallText(row, label(), -1f, TextAlignmentOptions.Center);
+			StepButton(row, "+", () => { increase(); text.text = label(); });
+		}
+
+		private RectTransform NewRow(string name, float height)
+		{
+			var go = new GameObject(name);
+			go.layer = _page.layer;
+			var rect = go.AddComponent<RectTransform>();
+			rect.SetParent(_page.transform, false);
+			// The page's layout may not control child sizes, so give the row its size explicitly
+			// (a new RectTransform defaults to 100x100).
+			rect.sizeDelta = new Vector2(((RectTransform)_textTemplate).rect.width, height);
+			var layout = go.AddComponent<HorizontalLayoutGroup>();
+			layout.spacing = 4f;
+			layout.childAlignment = TextAnchor.MiddleLeft;
+			layout.childControlWidth = true;
+			layout.childControlHeight = true;
+			layout.childForceExpandWidth = false;
+			layout.childForceExpandHeight = false;
+			var element = go.AddComponent<LayoutElement>();
+			element.preferredHeight = height;
+			element.minHeight = height;
+			return rect;
+		}
+
+		/// <param name="width">Fixed width, or negative to take the remaining space.</param>
+		private TMP_Text SmallText(Transform parent, string text, float width, TextAlignmentOptions alignment)
+		{
+			var go = Instantiate(_textTemplate.gameObject, parent, false);
+			go.SetActive(true);
+			var label = go.GetComponent<TMP_Text>();
+			label.fontSize *= 0.75f;
+			label.alignment = alignment;
+			label.textWrappingMode = TextWrappingModes.NoWrap;
+			SetStaticText(label, text);
+			var element = go.GetComponent<LayoutElement>();
+			if (element == null)
+				element = go.AddComponent<LayoutElement>();
+			if (width >= 0f)
+			{
+				element.preferredWidth = width;
+				element.flexibleWidth = 0f;
+			}
+			else
+			{
+				element.flexibleWidth = 1f;
+			}
+			return label;
+		}
+
+		private void StepButton(Transform parent, string symbol, System.Action onClick)
+		{
+			var go = Instantiate(_buttonTemplate.gameObject, parent, false);
+			go.SetActive(true);
+			var button = go.GetComponent<Button>();
+			// Replace the template's own click handler (it starts the tutorial).
+			button.onClick = new Button.ButtonClickedEvent();
+			button.onClick.AddListener(() => onClick());
+			button.interactable = true;
+			DestroyChild(go.transform, "HoverTooltip");
+			SetStaticText(go.GetComponentInChildren<TMP_Text>(true), symbol);
+			var element = go.GetComponent<LayoutElement>();
+			if (element == null)
+				element = go.AddComponent<LayoutElement>();
+			element.preferredWidth = 28f;
+			element.minWidth = 28f;
+			element.flexibleWidth = 0f;
+			element.preferredHeight = 22f;
 		}
 
 		void IModPageBuilder.Divider()

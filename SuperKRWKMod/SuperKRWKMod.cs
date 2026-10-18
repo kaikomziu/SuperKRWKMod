@@ -7,6 +7,7 @@ using SuperKRWKMod.Utilities;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Globalization;
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
@@ -92,13 +93,17 @@ namespace SuperKRWKMod
 			sleep.Init(_config, _tracker, motion, ui, counterStyle);
 			var body = cat.transform.Find("Body")?.GetComponent<Image>();
 			if (body != null)
-				gameObject.AddComponent<CatFace>().Init(_config, sleep, body);
+				gameObject.AddComponent<CatFace>().Init(_config, sleep, body, _tracker, visuals);
 			_meter = gameObject.AddComponent<SpeedMeter>();
 			_meter.Init(_config, _tracker, ui, counterStyle);
 			_combo = gameObject.AddComponent<ComboDisplay>();
 			_combo.Init(_config, _tracker, ui, counterStyle);
+			var bubble = gameObject.AddComponent<CatBubble>();
+			bubble.Init(mainCat, ui, counterStyle);
 			_chest = gameObject.AddComponent<ChestNotice>();
-			_chest.Init(_config, mainCat, ui, counterStyle);
+			_chest.Init(_config, bubble, ui, counterStyle);
+			gameObject.AddComponent<BreakReminder>().Init(_config, _tracker, bubble);
+			gameObject.AddComponent<Greeting>().Init(_config, _tracker, bubble);
 
 			_layout = gameObject.AddComponent<LayoutEditor>();
 			_layout.Init(_config, ui, counterStyle, ApplyConfig);
@@ -117,7 +122,7 @@ namespace SuperKRWKMod
 				gameObject.AddComponent<CustomSettingsPage>().Init(menuTabs[0], "Mods",
 					() => ModText.Get("Mods", "MOD"), ModListContent.Build);
 				gameObject.AddComponent<CustomSettingsPage>().Init(menuTabs[0], "Records",
-					() => ModText.Get("Records", "記録"), page => page.Text(_records.Describe(), 0.8f, leftAligned: true));
+					() => ModText.Get("Records", "記録"), _records.Build);
 			}
 			else
 				Log.WarnT(this, "Game menu not found; Mods settings page disabled.");
@@ -137,6 +142,8 @@ namespace SuperKRWKMod
 					_config.MeterToggleKey, _config.ReloadKey),
 				BuildExtra = page =>
 				{
+					BuildNumberSettings(page);
+					page.Divider();
 					page.Toggle(ConfigToggle(() => ModText.Get("Box behind meter and countdown", "メーターとカウントダウンに背景の枠"), "Text", "Background"));
 					page.Button(ModText.Get("Move the text (drag)", "文字の位置を変える（ドラッグ）"), () => _layout.Begin());
 					page.Button(ModText.Get("Reset text positions", "文字の位置をリセット"), () =>
@@ -171,10 +178,51 @@ namespace SuperKRWKMod
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Close eyes while asleep", "寝ているときに目を閉じる"), "Sleep", "CloseEyes"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Doze off sooner late at night", "夜は早めに寝る"), "Sleep", "NightMode"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Eyes follow the cursor", "目でカーソルを追う"), "Eyes", "FollowCursor"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Blink", "まばたき"), "Eyes", "Blink"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Happy eyes when patted", "なでるとにっこり"), "Eyes", "Happy"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Break reminder", "休憩のお知らせ"), "Break"));
+			info.Toggles.Add(ConfigToggle(() => ModText.Get("Greetings", "あいさつ"), "Greeting"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Combo counter", "コンボ表示"), "Combo"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Chest ready notice", "宝箱が買えたら知らせる"), "Chest"));
 			info.Toggles.Add(ConfigToggle(() => ModText.Get("Chest countdown", "宝箱のカウントダウン"), "Chest", "Countdown"));
 			ModRegistry.Register(info);
+		}
+
+		/// <summary>"− value +" rows for the main numbers, so they can be changed without the ini.</summary>
+		private void BuildNumberSettings(IModPageBuilder page)
+		{
+			page.Divider();
+			page.Text("<b>" + ModText.Get("Adjust numbers", "数値の調整") + "</b>", 0.9f);
+
+			Stepper(page, "Zoomies", "BounceKps", () => _config.BounceKps, 0.5f, 1f, 20f,
+				v => ModText.Format("Zoomies from {0} KPS", "ズーミー開始: {0} KPS", v.ToString("0.0", CultureInfo.InvariantCulture)));
+			Stepper(page, "Zoomies", "RainbowKps", () => _config.RainbowKps, 0.5f, 1f, 30f,
+				v => ModText.Format("Rainbow from {0} KPS", "虹色開始: {0} KPS", v.ToString("0.0", CultureInfo.InvariantCulture)));
+			Stepper(page, "Sleep", "IdleSeconds", () => _config.IdleSeconds, 10f, 10f, 600f,
+				v => ModText.Format("Sleep after {0} s", "寝るまで: {0}秒", v));
+			Stepper(page, "Sleep", "NightIdleSeconds", () => _config.NightIdleSeconds, 5f, 5f, 600f,
+				v => ModText.Format("Sleep at night after {0} s", "夜に寝るまで: {0}秒", v));
+			Stepper(page, "Combo", "MinCombo", () => _config.ComboMin, 5f, 5f, 500f,
+				v => ModText.Format("Combo shown from {0}", "コンボ表示: {0}から", v));
+			Stepper(page, "Chest", "ReminderMinutes", () => _config.ChestReminderMinutes, 5f, 0f, 120f,
+				v => v <= 0f
+					? ModText.Get("Chest reminder: once", "宝箱の再通知: 1回だけ")
+					: ModText.Format("Chest reminder every {0} min", "宝箱の再通知: {0}分ごと", v));
+			Stepper(page, "Break", "Minutes", () => _config.BreakMinutes, 5f, 5f, 240f,
+				v => ModText.Format("Break reminder after {0} min", "休憩のお知らせ: {0}分", v));
+		}
+
+		private void Stepper(IModPageBuilder page, string section, string key, Func<float> get, float step, float min, float max, Func<float, string> label)
+		{
+			void Change(float delta)
+			{
+				// Snap to the step so repeated clicks land on round numbers.
+				var value = Mathf.Clamp(Mathf.Round((get() + delta) / step) * step, min, max);
+				_config.Set(section, key, value.ToString(CultureInfo.InvariantCulture));
+				ApplyConfig();
+			}
+
+			page.Stepper(() => label(get()), () => Change(-step), () => Change(step));
 		}
 
 		private ModToggle ConfigToggle(Func<string> label, string section, string key = "Enabled")

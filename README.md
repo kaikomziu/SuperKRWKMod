@@ -30,11 +30,14 @@ All features are visual only. The mod listens to taps but never changes the game
 
 - **Zoomies:** type faster than `BounceKps` keys per second and the cat hops and wobbles; past `RainbowKps` it shimmers in rainbow colours.
 - **Speed meter:** current keys per second (KPS), session best and session taps above the cat. Toggle with `F7`.
-- **Eyes follow the cursor:** the pupils look toward your mouse. Eyes are detected automatically, so skins work too.
+- **Lively eyes:** the pupils look toward your mouse, the cat blinks now and then, and shows happy "^ ^" eyes when patted (by you or a friend) and at every 100 combo. Eyes are detected automatically, so skins work too.
 - **Sleep mode:** after `IdleSeconds` without input the cat breathes slowly, closes its eyes and floats a "Zzz". Any key wakes it. Late at night (23:00–5:00 by default) it dozes off after `NightIdleSeconds` instead.
 - **Combo counter:** "×128 COMBO" pops up next to the cat while you keep typing without a pause, changing colour at 50 / 100 / 200.
 - **Chest notice:** a speech bubble from the cat ("Chest ready!", only while a chest is out) and a shake of the shop button when you have enough taps for a chest, with a reminder every `ReminderMinutes`. A small countdown next to the combo shows when the next chest appears, or how many taps are still missing. You still open chests yourself: the mod only reads the game's state and never buys or opens anything.
-- **Records:** today's taps, typing time, best KPS and longest combo, all-time bests and the last 7 days, on their own **Settings → Records** page. Saved in `SuperKRWKMod\records.csv` and counted by the mod only.
+- **Records:** today's taps, typing time, best KPS and longest combo, all-time bests and a bar chart of the last 7 days, on their own **Settings → Records** page. Saved in `SuperKRWKMod\records.csv` and counted by the mod only.
+- **Break reminder:** after typing for `Minutes` (50 by default) without a real pause, the cat suggests a little rest. Only a reminder: taps keep counting.
+- **Greetings:** the cat says good morning / hello / good evening when the game starts, and once a night suggests bed when it gets late.
+- **Adjust numbers in game:** the Mods page has "− value +" rows for the zoomies and rainbow speeds, sleep times, combo start, chest reminder and break reminder.
 - **App rules:** switch features off while a given app is running, and back on when it closes (for example, no rainbow glow while playing a rhythm game). In game: **Settings → Mods → App rules → "+ Add from running apps"**, then tick the features to switch off. Only app names are checked, locally.
 - **Readable, movable text:** the meter and countdown sit in a box like the game's counter; other text has an outline. Text size, outline colour and thickness are set on the Mods page, and **"Move the text (drag)"** lets you drag each piece of text anywhere.
 - **Settings file:** `SuperKRWKMod\superkrwk.ini` in the game folder is created on first launch. Edit it and press `F9` (with Bongo Cat focused) to reload.

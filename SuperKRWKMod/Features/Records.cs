@@ -138,18 +138,31 @@ namespace SuperKRWKMod.Features
 					ShortDate(bestDay.Date), Number(bestDay.Taps)));
 			}
 
-			// Last 7 days, newest first.
-			sb.Append("\n\n<b>").Append(ModText.Get("Last 7 days", "最近7日")).Append("</b>");
-			for (int i = 0; i < 7; i++)
+			return sb.ToString();
+		}
+
+		/// <summary>The Records settings page: summary, then a bar chart of the last 7 days.</summary>
+		public void Build(IModPageBuilder page)
+		{
+			page.Text(Describe(), 0.8f, leftAligned: true);
+			page.Divider();
+			page.Text("<b>" + ModText.Get("Last 7 days", "最近7日") + "</b>", 0.85f, leftAligned: true);
+
+			// Oldest first, so the chart reads left-to-right in time from top to bottom.
+			var items = new List<BarItem>();
+			for (int i = 6; i >= 0; i--)
 			{
 				var key = DateTime.Now.AddDays(-i).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
 				_days.TryGetValue(key, out var day);
-				sb.Append('\n').Append(ShortDate(key)).Append("  ")
-					.Append(day != null ? Number(day.Taps) : "-")
-					.Append(day != null && day.Taps > 0 ? "  (" + Duration(day.ActiveSeconds) + ")" : "");
+				long taps = day != null ? day.Taps : 0;
+				items.Add(new BarItem
+				{
+					Label = ShortDate(key),
+					Value = taps,
+					ValueText = taps > 0 ? Number(taps) + " (" + Duration(day.ActiveSeconds) + ")" : "-",
+				});
 			}
-
-			return sb.ToString();
+			page.BarChart(items);
 		}
 
 		private static string Number(long value)
